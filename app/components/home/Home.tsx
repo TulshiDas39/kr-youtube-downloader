@@ -1,16 +1,37 @@
-import React from "react";
-import { FaBeer } from 'react-icons/fa';
-import { Button } from 'react-bootstrap';
+import React, { ChangeEvent } from "react";
+import { Button, Form } from 'react-bootstrap';
+import {IoMdDownload} from 'react-icons/io'
+import { IHomeState } from "./states";
+import { ipcRenderer } from "electron";
+import { Renderer_Events } from "../../constants/constants";
 
+export class Home extends React.PureComponent<void,IHomeState>{
+  state:IHomeState = {
+    url:""
+  }
 
-export class Home extends React.PureComponent{
   render(){
     return (
-      <div>
-        <h1 className="test">home component</h1>
-        <h3> Lets go for a <FaBeer />? </h3>
-        <Button variant="primary">Primary</Button>
+      <div className="container text-center">
+        <h1 className="test">kr-youtube-downloader</h1>
+        <Form onSubmit={this.handleSubmit}>
+          <Form.Group controlId="exampleForm.ControlInput1">
+            {/* <Form.Label>URL</Form.Label> */}
+            <div className="d-flex">
+              <Form.Control type="text" placeholder="URL" value={this.state.url} onChange={this.handleChange} />
+              <Button className="ml-1"><IoMdDownload /></Button>
+            </div>
+          </Form.Group>
+        </Form>
       </div>
     )
+  }
+
+  handleChange=(e:ChangeEvent<HTMLInputElement>)=>{
+    this.setState({url:e.target.value});
+  }
+
+  handleSubmit=()=>{
+    ipcRenderer.send(Renderer_Events.START_DOWNLOAD, this.state.url);
   }
 }
