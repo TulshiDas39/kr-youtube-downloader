@@ -32,6 +32,8 @@ node_modules
 
 # App packaged
 release
+#disable eslint for app
+app
 app/*.main.prod.js
 app/main.prod.js
 app/main.prod.js.map
