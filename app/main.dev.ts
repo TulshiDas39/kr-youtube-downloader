@@ -25,7 +25,7 @@ export default class AppUpdater {
   }
 }
 
-let mainWindow: BrowserWindow | null = null;
+export let mainWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
