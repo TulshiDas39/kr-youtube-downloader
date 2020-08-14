@@ -5,10 +5,12 @@ import { IHomeState } from "./states";
 import { ipcRenderer } from "electron";
 import { Renderer_Events } from "../../constants/constants";
 import { DownloadList } from "./subComponents/DownloadList";
-import { Helper } from "../../common/helpers";
-import { getVideoID, validateID } from "ytdl-core";
+import { Helper } from "../../lib/helpers";
+import { getVideoID, validateID, validateURL } from "ytdl-core";
+import { connect, ConnectedProps } from "react-redux";
+import { ActionModal } from "../common/Modals";
 
-export class Home extends React.PureComponent<void,IHomeState>{
+export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
   state:IHomeState = {
     url:""
   }
@@ -39,7 +41,21 @@ export class Home extends React.PureComponent<void,IHomeState>{
 
   handleSubmit=(e:FormEvent<HTMLElement>)=>{
     e.preventDefault();
+    if(!validateURL(this.state.url)) {
+      this.props.dispatch(ActionModal.showAlertModal({
+        msg:'Invalid URL'
+      }));
+      return;
+    }
     const id = getVideoID(this.state.url);
-    if(!Helper.downloadExist(id) && validateID(id)) ipcRenderer.send(Renderer_Events.START_DOWNLOAD, this.state.url);
+    if(!Helper.removeItemIfExist(id) )return;
+    ipcRenderer.send(Renderer_Events.START_DOWNLOAD, this.state.url);
   }
 }
+
+interface IHomeProps extends ConnectedProps<typeof connector>{
+
+}
+
+const connector = connect();
+export const Home = connector(HomeComponent);

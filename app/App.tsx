@@ -3,7 +3,7 @@ import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 // import HomePage from './containers/HomePage';
 import { Layout } from './containers/Layout';
-import { UI_Routes } from './common/routes';
+import { UI_Routes } from './lib/routes';
 import { Home } from './components/home/Home';
 
 // Lazily load routes and code split with webpacck

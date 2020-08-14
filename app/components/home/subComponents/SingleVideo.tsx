@@ -1,6 +1,6 @@
 import React from "react";
 import { Container, Row, Col, Image, ProgressBar, } from "react-bootstrap";
-import { IDownload, IProgress } from "../../../common";
+import { IDownload, IProgress } from "../../../lib";
 import { ISingleVideoState } from "../states";
 import { ipcRenderer } from "electron";
 import { Main_Events, Renderer_Events } from "../../../constants/constants";
@@ -70,6 +70,7 @@ export class SingleVideo extends React.PureComponent<ISingleVideoProps,ISingleVi
       if(this.props.singleVideo.id === progress.singleVideoId && this.props.playlistId === progress.playlistId) {
         clearInterval(this.progressInterval);
         this.setState({downloadComplete:true});
+        this.props.onComplete(this.props.singleVideo.id);
       }
     })
   }
@@ -85,4 +86,5 @@ export class SingleVideo extends React.PureComponent<ISingleVideoProps,ISingleVi
 export interface ISingleVideoProps{
     singleVideo:IDownload;
     playlistId?:string;
+    onComplete:(id:string)=>void;
 }

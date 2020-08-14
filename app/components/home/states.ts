@@ -1,4 +1,4 @@
-import { IDownload } from "../../common";
+import { IDownload } from "../../lib";
 
 export interface IHomeState {
   url:string

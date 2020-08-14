@@ -43,5 +43,5 @@ export const configuredStore = (initialState?: RootState) => {
   }
   return store;
 };
-export type Store = ReturnType<typeof configuredStore>;
+export type IStore = ReturnType<typeof configuredStore>;
 export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>;

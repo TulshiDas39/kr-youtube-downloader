@@ -1,6 +1,7 @@
 import fs from "fs"
 import { ipcMain, shell } from "electron";
 import { Renderer_Events } from "../constants/constants";
+import { ConstantMain } from "../constants/constantMain";
 export class FileManager{
 
   constructor(){
@@ -21,5 +22,8 @@ export class FileManager{
     if(!fs.existsSync(path)) fs.writeFileSync(path,"");
   }
 
+  static checkForWorksPace(){
+    if(!fs.existsSync(ConstantMain.worksPaceDir)) fs.mkdirSync(ConstantMain.worksPaceDir);
+  }
 
 }

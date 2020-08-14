@@ -1,9 +1,13 @@
 import { videoInfo, videoFormat } from "ytdl-core";
+import { IStore } from "../store";
 
 export interface IDownload{
   id:string;
   singleVideoInfo?:ISingleVideo;
-  videoList?:any;
+  videoList?:{
+    list:ISingleVideo[];
+  };
+  inProgress?:boolean;
 }
 export interface ISingleVideo{
   info:videoInfo;
@@ -16,3 +20,5 @@ export interface IProgress{
   playlistId?:string;
   chunkSize:number;
 }
+
+export type IReduxState = ReturnType<IStore['getState']>

@@ -1,14 +1,15 @@
-import { ipcMain, IpcMainEvent, app } from "electron";
+import { ipcMain, IpcMainEvent } from "electron";
 import { Renderer_Events, Main_Events } from "../constants/constants";
 import path from "path";
 import ytdl, {videoInfo} from "ytdl-core";
 import fs from "fs";
 import { mainWindow } from "../main.dev";
-import { ISingleVideo, IProgress } from "../common";
+import { ISingleVideo, IProgress } from "../lib";
 import { FileManager } from "./FileManager";
+import { ConstantMain } from "../constants/constantMain";
 
 export class DownloadManager{
-  readonly workspacePath = path.join(app.getPath('videos'),"kr_youtube_downloader");
+  readonly workspacePath = ConstantMain.worksPaceDir;
   formate = 18;
   readonly charactersToAvoidInFileName = /[#%&{}\\<>*?\/\s$!'":@+`|=]/g
   constructor(){
@@ -31,6 +32,7 @@ export class DownloadManager{
   }
 
   downloadVideo(url:string){
+    FileManager.checkForWorksPace();
     ytdl.getInfo(url).then(info=>{
       this.downloadVideoFromInfo(info);
     });
