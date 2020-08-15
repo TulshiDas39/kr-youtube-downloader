@@ -1,7 +1,7 @@
 {
-  "name": "electron-react-boilerplate",
-  "productName": "ElectronReact",
-  "version": "1.3.0",
+  "name": "kr-youtube-downloader",
+  "productName": "YoutubeDownloader",
+  "version": "0.0.1",
   "description": "Electron application boilerplate based on React, React Router, Webpack, React Hot Loader for rapid application development",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
@@ -103,33 +103,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electron-react-boilerplate/electron-react-boilerplate.git"
+    "url": "git+https://github.com/TulshiDas39/kr-youtube-downloader.git"
   },
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://electron-react-boilerplate.js.org"
+    "name": "Tulshi Das",
+    "email": "tulshidas37@gmail.com",
+    "url": "https://github.com/TulshiDas39"
   },
   "contributors": [
     {
-      "name": "Vikram Rangaraj",
-      "email": "vikr01@icloud.com",
-      "url": "https://github.com/vikr01"
-    },
-    {
-      "name": "Amila Welihinda",
-      "email": "amilajack@gmail.com",
-      "url": "https://github.com/amilajack"
-    },
-    {
-      "name": "John Tran",
-      "email": "jptran318@gmail.com",
-      "url": "https://github.com/jooohhn"
+      "name": "Tulshi Das ",
+      "email": "tulshidas37@gmail.com",
+      "url": "https://github.com/TulshiDas39"
     }
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues"
+    "url": "https://github.com/TulshiDas39/kr-youtube-downloader/issues"
   },
   "keywords": [
     "electron",
@@ -143,7 +133,7 @@
     "hot",
     "reload"
   ],
-  "homepage": "https://github.com/electron-react-boilerplate/electron-react-boilerplate#readme",
+  "homepage": "https://github.com/TulshiDas39/kr-youtube-downloader#readme",
   "jest": {
     "testURL": "http://localhost/",
     "moduleNameMapper": {
