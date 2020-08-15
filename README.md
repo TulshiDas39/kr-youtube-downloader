@@ -6,8 +6,9 @@
 
 kr-youtube-downloader is a desktop application to download youtube videos from youtube.
 
-  - single Video and playlist download support
-  - currently support windows plateform only
+  - single Video download support
+  - concurrent download support
+  - support windows,linux and mac plateform
   - apps is getting updated day by day and more features are coming
   
 ### Installation
