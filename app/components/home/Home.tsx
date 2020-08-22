@@ -6,12 +6,13 @@ import { ipcRenderer } from "electron";
 import { Renderer_Events } from "../../constants/constants";
 import { DownloadList } from "./subComponents/DownloadList";
 import { Helper } from "../../lib/helpers";
-import { getVideoID, validateID, validateURL } from "ytdl-core";
+import ytdl from "ytdl-core";
 import { connect, ConnectedProps } from "react-redux";
 import { ActionModal } from "../common/Modals";
 import { ActionHome } from "./slice";
 import { GiEuropeanFlag } from "react-icons/gi";
 import { IReduxState } from "../../lib";
+import ytpl from "ytpl";
 
 export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
   state:IHomeState = {
@@ -46,19 +47,27 @@ export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
     this.setState({url:e.target.value});
   }
 
-  handleSubmit=(e:FormEvent<HTMLElement>)=>{
+  handleSubmit= async(e:FormEvent<HTMLElement>)=>{
     e.preventDefault();
-    if(!validateURL(this.state.url)) {
+    let id:string;
+    if(ytdl.validateURL(this.state.url)){
+      id = ytdl.getVideoID(this.state.url);
+      if(this.props.inFetch.includes(id)) return;
+      ipcRenderer.send(Renderer_Events.START_DOWNLOAD, this.state.url);
+    }
+    else if(ytpl.validateURL(this.state.url)){
+      id = await ytpl.getPlaylistID(this.state.url);
+      if(this.props.inFetch.includes(id)) return;
+      ipcRenderer.send(Renderer_Events.START_PLAYLIST_DOWNLOAD, this.state.url);
+    }
+    else {
       this.props.dispatch(ActionModal.showAlertModal({
         msg:'Invalid URL'
       }));
       return;
     }
-    const id = getVideoID(this.state.url);
-    if(this.props.inFetch.includes(id)) return;
     if(!Helper.removeItemIfExist(id) )return;
     this.props.dispatch(ActionHome.addInFetch(id));
-    ipcRenderer.send(Renderer_Events.START_DOWNLOAD, this.state.url);
   }
 }
 

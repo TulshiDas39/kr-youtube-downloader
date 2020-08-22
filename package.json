@@ -283,7 +283,8 @@
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.5",
     "source-map-support": "^0.5.19",
-    "ytdl-core": "^3.2.0"
+    "ytdl-core": "^3.2.0",
+    "ytpl": "^0.3.0"
   },
   "devEngines": {
     "node": ">=7.x",

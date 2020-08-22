@@ -7,6 +7,7 @@ import { mainWindow } from "../main.dev";
 import { ISingleVideo, IProgress } from "../lib";
 import { FileManager } from "./FileManager";
 import { ConstantMain } from "../constants/constantMain";
+import ytpl from "ytpl";
 
 export class DownloadManager{
   readonly workspacePath = ConstantMain.worksPaceDir;
@@ -23,6 +24,7 @@ export class DownloadManager{
 
   handleRendererEvents(){
     this.handleDownloadStart();
+    this.handlePlaylistDownloadStart();
   }
 
   handleDownloadStart(){
@@ -31,13 +33,26 @@ export class DownloadManager{
     })
   }
 
+  handlePlaylistDownloadStart(){
+    ipcMain.on(Renderer_Events.START_PLAYLIST_DOWNLOAD, (event: IpcMainEvent,url:string) => {
+      this.downloadPlaylist(url);
+    })
+  }
+
   downloadVideo(url:string){
     FileManager.checkForWorksPace();
     ytdl.getInfo(url).then(info=>{
       this.downloadVideoFromInfo(info);
     });
-    // let stream = video.pipe(fs.createWriteStream(this.downloadPath+'/video.flv'));
-    // video.addListener('')
+  }
+
+  async downloadPlaylist(url:string){
+    FileManager.checkForWorksPace();
+    const id = await ytpl.getPlaylistID(url);
+    ytpl(id,(err,result)=>{
+      if(err) console.log(err);
+      if(result)console.log(result);
+    })
   }
 
 
@@ -46,7 +61,7 @@ export class DownloadManager{
     const video = ytdl.downloadFromInfo(info,{quality:this.formate});
     let fileName = info.videoDetails.title.toString()?.replace(this.charactersToAvoidInFileName,"_");
     fileName += `.${formate?.container || "mp4"}`
-    const download_path  = path.join(this.workspacePath,fileName);// `${this.downloadPath}/${fileName}.${formate?.container || "mp4"}`;
+    const download_path  = path.join(this.workspacePath,fileName);
     const singleVideo:ISingleVideo = {
       info:info,
       format:formate!,
