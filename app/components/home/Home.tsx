@@ -9,6 +9,9 @@ import { Helper } from "../../lib/helpers";
 import { getVideoID, validateID, validateURL } from "ytdl-core";
 import { connect, ConnectedProps } from "react-redux";
 import { ActionModal } from "../common/Modals";
+import { ActionHome } from "./slice";
+import { GiEuropeanFlag } from "react-icons/gi";
+import { IReduxState } from "../../lib";
 
 export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
   state:IHomeState = {
@@ -24,7 +27,11 @@ export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
             {/* <Form.Label>URL</Form.Label> */}
             <div className="d-flex">
               <Form.Control type="text" placeholder="URL" value={this.state.url} onChange={this.handleChange} />
-              <Button className="ml-1" type="submit"><IoMdDownload /></Button>
+              {/* <Button className="ml-1" type="submit"><IoMdDownload /></Button> */}
+              {
+                this.props.inFetch.length ? <GiEuropeanFlag className="icon-spin h1"/>:
+                <Button className="ml-1" type="submit"><IoMdDownload /></Button>
+              }
             </div>
           </Form.Group>
         </Form>
@@ -48,7 +55,9 @@ export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
       return;
     }
     const id = getVideoID(this.state.url);
+    if(this.props.inFetch.includes(id)) return;
     if(!Helper.removeItemIfExist(id) )return;
+    this.props.dispatch(ActionHome.addInFetch(id));
     ipcRenderer.send(Renderer_Events.START_DOWNLOAD, this.state.url);
   }
 }
@@ -57,5 +66,6 @@ interface IHomeProps extends ConnectedProps<typeof connector>{
 
 }
 
-const connector = connect();
+const mapStateToProps = (state:IReduxState)=>state.home;
+const connector = connect(mapStateToProps);
 export const Home = connector(HomeComponent);

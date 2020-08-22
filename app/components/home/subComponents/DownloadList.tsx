@@ -9,6 +9,7 @@ import { MyModal } from "../../../lib/Modal";
 import { Helper } from "../../../lib/helpers";
 import { connect, ConnectedProps } from "react-redux";
 import { ActionModal } from "../../common/Modals";
+import { ActionHome } from "../slice";
 
 class DownloadListComponent extends React.PureComponent<DownloadListProps,IDownloadListState>{
   state:IDownloadListState={
@@ -83,7 +84,7 @@ class DownloadListComponent extends React.PureComponent<DownloadListProps,IDownl
 
   handleNewDownload=()=>{
     ipcRenderer.on(Main_Events.ADD_SINGLE_DOWNLOAD_ITEM,(e,item:ISingleVideo)=>{
-      console.log(item);
+       this.props.dispatch(ActionHome.removeFromFetch(item.info.videoDetails.videoId));
        const downloadItem:IDownload={
          id:item.info.videoDetails.videoId,
          singleVideoInfo:item,

@@ -13,3 +13,7 @@ export interface ISingleVideoState{
   progress:number;
   downloadComplete?:boolean;
 }
+
+export interface IHomeReducerState{
+  inFetch:string[];
+}
