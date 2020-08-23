@@ -1,11 +1,14 @@
 import { videoInfo, videoFormat } from "ytdl-core";
 import { IStore } from "../store";
+import { result } from "ytpl";
 
 export interface IDownload{
   id:string;
   singleVideoInfo?:ISingleVideo;
-  videoList?:{
-    list:ISingleVideo[];
+  playList?:{
+    fetched:ISingleVideo[];
+    info:result;
+    downloadPath:string;
   };
   inProgress?:boolean;
 }
@@ -22,3 +25,9 @@ export interface IProgress{
 }
 
 export type IReduxState = ReturnType<IStore['getState']>
+
+export interface IFetch{
+  videoId:string,
+  channel:string,
+  playlistPath?:string,
+}

@@ -10,6 +10,7 @@ import { Helper } from "../../../lib/helpers";
 import { connect, ConnectedProps } from "react-redux";
 import { ActionModal } from "../../common/Modals";
 import { ActionHome } from "../slice";
+import ytpl,{result} from "ytpl";
 
 class DownloadListComponent extends React.PureComponent<DownloadListProps,IDownloadListState>{
   state:IDownloadListState={
@@ -28,7 +29,7 @@ class DownloadListComponent extends React.PureComponent<DownloadListProps,IDownl
             if(download.singleVideoInfo) return (
               <SingleVideo key={download.id} singleVideo={download} onComplete={this.handleComplete} />
             )
-            return <PlaylistDownload key={download.id} />
+            return <PlaylistDownload key={download.id} downloadInfo={download} />
           })
         }
       </div>
@@ -59,6 +60,7 @@ class DownloadListComponent extends React.PureComponent<DownloadListProps,IDownl
 
   setIpcEvents=()=>{
     this.handleNewDownload();
+    this.handleNewPlaylistDownload();
   }
 
   itemExist=(id:string)=>{
@@ -80,6 +82,14 @@ class DownloadListComponent extends React.PureComponent<DownloadListProps,IDownl
     console.log(this.state.downloads);
     let item = this.state.downloads.find(x=>x.id === id);
     return !!item?.inProgress;
+  }
+
+  handleNewPlaylistDownload=()=>{
+    ipcRenderer.on(Main_Events.ADD_PLAYLIST_DOWNLOAD_ITEM,(e,item: IDownload)=>{
+      console.log(item);
+      this.props.dispatch(ActionHome.removeFromFetch(item.id));
+      this.setState({downloads:this.state.downloads.concat(item)});
+    })
   }
 
   handleNewDownload=()=>{
