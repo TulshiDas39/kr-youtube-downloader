@@ -5,7 +5,6 @@ import { IPlaylistDownloadState } from "../states";
 import { FaFolderOpen } from "react-icons/fa";
 import { ipcRenderer } from "electron";
 import { Renderer_Events, Main_Events } from "../../../constants/constants";
-import { videoInfo } from "ytdl-core";
 import { SingleVideo } from "./SingleVideo";
 
 export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps,IPlaylistDownloadState>{
@@ -70,11 +69,6 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
   }
   handleFetchComplete=()=>{
     ipcRenderer.on(this.channels.onFetchVideo,(e, data: ISingleVideo)=>{
-      const download:IDownload={
-        id:data.info.videoDetails.videoId,
-        inProgress:false,
-        singleVideoInfo:data,
-      }
       this.setState({
         videoList:[...this.state.videoList,data]
       })
