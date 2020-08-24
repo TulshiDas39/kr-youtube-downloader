@@ -4,7 +4,7 @@ import path from "path";
 import ytdl, {videoInfo} from "ytdl-core";
 import fs from "fs";
 import { mainWindow } from "../main.dev";
-import { ISingleVideo, IProgress, IDownload, IFetch } from "../lib";
+import { ISingleVideo, IProgress, IDownload, IFetch, IPlaylistVideo } from "../lib";
 import { FileManager } from "./FileManager";
 import { ConstantMain } from "../constants/constantMain";
 import ytpl from "ytpl";
@@ -26,6 +26,7 @@ export class DownloadManager{
     this.handleDownloadStart();
     this.handlePlaylistDownloadStart();
     this.handleVideoInfoFetch();
+    this.hanldePlaylstVideoDownload();
   }
 
   handleDownloadStart(){
@@ -44,8 +45,9 @@ export class DownloadManager{
     ipcMain.on(Renderer_Events.FETCH_SINGLE_VIDEO_INFO, (_event,info:IFetch) => {
 
       ytdl.getInfo(Constants.URL_PREFIX+info.videoId).then(data=>{
-        const filename = data.videoDetails.title?.replace(this.charactersToAvoidInFileName,"_");
+        let filename = data.videoDetails.title?.replace(this.charactersToAvoidInFileName,"_");
         const formate = data.formats.find(x=>x.itag === this.formate);
+        filename += `.${formate?.container || "mp4"}`
         const videoInfo:ISingleVideo={
           downloadPath:path.join(info.playlistPath!,filename),
           info:data,
@@ -56,10 +58,21 @@ export class DownloadManager{
     })
   }
 
+
+  hanldePlaylstVideoDownload=()=>{
+    ipcMain.on(Renderer_Events.DOWNLOAD_PLALIST_VIDEO,(_e,info:IPlaylistVideo)=>{
+      this.downloadVideoFromInfo(info.video.info,info.video.downloadPath,info.playlistId);
+    })
+  }
+
   downloadVideo(url:string){
     FileManager.checkForWorksPace();
     ytdl.getInfo(url).then(info=>{
-      this.downloadVideoFromInfo(info);
+      let fileName = info.videoDetails.title.toString()?.replace(this.charactersToAvoidInFileName,"_");
+      const formate = info.formats.find(x=>x.itag === this.formate);
+      fileName += `.${formate?.container || "mp4"}`
+      const download_path  = path.join(this.workspacePath,fileName);
+      this.downloadVideoFromInfo(info,download_path);
     });
   }
 
@@ -71,6 +84,7 @@ export class DownloadManager{
       if(result){
         const folderName = result.title.replace(this.charactersToAvoidInFileName,"_");
         const downloadPath = path.join(ConstantMain.worksPaceDir,folderName);
+        FileManager.createDirIfNotExist(downloadPath);
         const download:IDownload={
           id:id,
           inProgress:true,
@@ -86,19 +100,19 @@ export class DownloadManager{
   }
 
 
-  downloadVideoFromInfo(info:videoInfo,playlistId?:string){
+  downloadVideoFromInfo(info:videoInfo,downloadPath:string,playlistId?:string){
     const formate = info.formats.find(x=>x.itag === this.formate);
     const video = ytdl.downloadFromInfo(info,{quality:this.formate});
-    let fileName = info.videoDetails.title.toString()?.replace(this.charactersToAvoidInFileName,"_");
-    fileName += `.${formate?.container || "mp4"}`
-    const download_path  = path.join(this.workspacePath,fileName);
+    // let fileName = info.videoDetails.title.toString()?.replace(this.charactersToAvoidInFileName,"_");
+    // fileName += `.${formate?.container || "mp4"}`
+    // const download_path  = path.join(this.workspacePath,fileName);
     const singleVideo:ISingleVideo = {
       info:info,
       format:formate!,
-      downloadPath:download_path
+      downloadPath:downloadPath
     }
     if(!playlistId) mainWindow?.webContents.send(Main_Events.ADD_SINGLE_DOWNLOAD_ITEM,singleVideo);
-    video.pipe(fs.createWriteStream(download_path));
+    video.pipe(fs.createWriteStream(downloadPath));
     video.on('data',(chunk)=>{
     })
     video.on('progress',(chunkSize:number)=>{

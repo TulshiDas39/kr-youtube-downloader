@@ -22,4 +22,5 @@ export interface IHomeReducerState{
 export interface IPlaylistDownloadState{
   currentDownloadIndex:number;
   videoList:ISingleVideo[],
+  expanded:boolean,
 }

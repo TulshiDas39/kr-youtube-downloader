@@ -31,3 +31,8 @@ export interface IFetch{
   channel:string,
   playlistPath?:string,
 }
+
+export interface IPlaylistVideo{
+  video:ISingleVideo,
+  playlistId:string,
+}

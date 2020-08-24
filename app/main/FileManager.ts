@@ -25,5 +25,10 @@ export class FileManager{
   static checkForWorksPace(){
     if(!fs.existsSync(ConstantMain.worksPaceDir)) fs.mkdirSync(ConstantMain.worksPaceDir);
   }
+  static createDirIfNotExist(path:string){
+    if(!fs.existsSync(path)) fs.mkdir(path,(err=>{
+      console.error(err);
+    }));
+  }
 
 }
