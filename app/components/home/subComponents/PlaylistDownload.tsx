@@ -57,7 +57,7 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
 
             </Col>
           </Row>
-          {this.state.expanded && <div className="row" style={{border:'5px solid green'}}>
+          <div className={`row ${this.state.expanded?'':'d-none'}`} style={{border:'5px solid green'}}>
                 {
                   this.state.videoList.map(v=>(
                     <SingleVideo key={v.info.videoDetails.videoId} onComplete={this.handleDownloadComplete} singleVideo={{
@@ -66,7 +66,7 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
                     }} playlistId={this.props.downloadInfo.id} />
                   ))
                 }
-          </div>}
+          </div>
         </Container>
       </div>
     )
@@ -76,9 +76,8 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
     this.setState({expanded:!this.state.expanded});
   }
   handleDownloadComplete=()=>{
-    this.setState({currentDownloadIndex:this.state.currentDownloadIndex+ 1},()=>{
-      if(this.state.currentDownloadIndex < this.props.downloadInfo.playList?.info.items.length!) this.downloadVideo();
-    });
+    if(this.state.currentDownloadIndex < this.props.downloadInfo.playList?.info.items.length! - 1)
+      this.setState({currentDownloadIndex:this.state.currentDownloadIndex+ 1},this.downloadVideo);
 
   }
   handleFolderClick=()=>{

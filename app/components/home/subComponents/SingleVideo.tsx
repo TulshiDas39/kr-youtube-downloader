@@ -76,6 +76,7 @@ export class SingleVideo extends React.PureComponent<ISingleVideoProps,ISingleVi
   }
 
   componentDidMount(){
+    console.log('mounting');
     this.handleProgress();
     this.progressInterval = setInterval(this.setProgress,500);
     this.handleComplete();
