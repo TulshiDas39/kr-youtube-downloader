@@ -1,7 +1,7 @@
 {
   "name": "kr-youtube-downloader",
   "productName": "YoutubeDownloader",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Youtube downloader",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",

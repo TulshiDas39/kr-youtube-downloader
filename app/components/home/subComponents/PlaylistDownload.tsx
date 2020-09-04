@@ -76,15 +76,22 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
     this.setState({expanded:!this.state.expanded});
   }
   handleDownloadComplete=()=>{
-    if(this.state.currentDownloadIndex < this.props.downloadInfo.playList?.info.items.length! - 1)
-      this.setState({currentDownloadIndex:this.state.currentDownloadIndex+ 1},this.downloadVideo);
+    if(this.state.currentDownloadIndex >= this.props.downloadInfo.playList?.info.items.length! - 1) return;
+    var interval = setInterval(()=>{
+      if(this.state.currentDownloadIndex < this.state.videoList.length-1) {
+        this.setState({currentDownloadIndex:this.state.currentDownloadIndex+ 1},this.downloadVideo);
+        clearInterval(interval);
+      }
+    },1000)
 
   }
   handleFolderClick=()=>{
     ipcRenderer.send(Renderer_Events.OPEN_FOLDER,this.props.downloadInfo.playList?.downloadPath!);
   }
 
-  fetchVideoInfo=(videoId:string)=>{
+  fetchVideoInfo=()=>{
+    console.log('fetching index:'+this.fetchIndex);
+    const videoId = this.props.downloadInfo.playList?.info.items[this.fetchIndex].id!
     const data:IFetch={
       channel:Main_Events.ON_SINGLE_VIDEO_INFO_FETCH_COMPLETE+this.props.downloadInfo.id,
       videoId:videoId,
@@ -92,42 +99,49 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
     }
     ipcRenderer.send(Renderer_Events.FETCH_SINGLE_VIDEO_INFO,data);
   }
+
   handleFetchComplete=()=>{
     ipcRenderer.on(this.channels.onFetchVideo,(_e, data: ISingleVideo)=>{
+      console.log('fetch complete');
       this.setState({
         videoList:[...this.state.videoList,data]
+      },()=>{
+        if(this.state.currentDownloadIndex === 0)this.downloadVideo();
       })
       this.fetchIndex++;
-      if(this.fetchIndex === 1)this.downloadVideo();
-      if(this.fetchIndex < this.props.downloadInfo.playList?.info.items.length!) this.fetchVideoInfo(this.props.downloadInfo.playList?.info.items[this.fetchIndex].id!)
+      if(this.fetchIndex < this.props.downloadInfo.playList?.info.items.length!) this.fetchVideoInfo()
     })
   }
+
+  handleFetchWaitLimitExit=()=>{
+    var prevFetchIndex = this.fetchIndex;
+    var interval = setInterval(()=>{
+      if(this.fetchIndex >= this.props.downloadInfo.playList?.info.items.length! -1){
+        clearInterval(interval);
+        return;
+      }
+      if(prevFetchIndex === this.fetchIndex){
+        console.log('time limit exit');
+        this.fetchIndex++;
+        this.fetchVideoInfo();
+      }
+      else prevFetchIndex=this.fetchIndex;
+    },20000)
+  }
+
   downloadVideo=()=>{
-    if(this.fetchIndex <= this.state.currentDownloadIndex){
-      this.intervalFordDownload = setInterval(()=>{
-        console.log('fetchIndex:'+this.fetchIndex)
-        console.log('downloadIndex:'+this.state.currentDownloadIndex);
-        if(this.fetchIndex > this.state.currentDownloadIndex){
-          const data:IPlaylistVideo={
-            playlistId:this.props.downloadInfo.id,
-            video:this.state.videoList[this.state.currentDownloadIndex]
-          }
-          clearInterval(this.intervalFordDownload);
-          ipcRenderer.send(Renderer_Events.DOWNLOAD_PLALIST_VIDEO,data);
-        }
-      },1000);
-      return;
-    }
+    // console.log('fetchIndex:'+this.fetchIndex)
+    console.log('downloadIndex:'+this.state.currentDownloadIndex);
     const data:IPlaylistVideo={
       playlistId:this.props.downloadInfo.id,
       video:this.state.videoList[this.state.currentDownloadIndex]
     }
     ipcRenderer.send(Renderer_Events.DOWNLOAD_PLALIST_VIDEO,data);
-
   }
   componentDidMount(){
     console.log(this.props.downloadInfo);
-    this.fetchVideoInfo(this.props.downloadInfo.playList?.info.items[0].id!);
+    this.fetchVideoInfo();
+    this.handleFetchWaitLimitExit();
     this.handleFetchComplete();
   }
 }
