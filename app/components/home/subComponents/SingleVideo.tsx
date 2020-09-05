@@ -75,24 +75,12 @@ export class SingleVideo extends React.PureComponent<ISingleVideoProps,ISingleVi
     })
   }
 
-  handleException=()=>{
-    var oldProgress = this.state.progress;
-    if(!this.props.playlistId) return;
-    let interval = setInterval(() => {
-      if(this.state.progress === oldProgress){
-        this.props.onComplete(this.props.singleVideo.id);
-        clearInterval(interval);
-      }
-      else oldProgress = this.state.progress;
-    }, 30000);
-  }
-
   componentDidMount(){
     console.log('mounting');
     this.handleProgress();
     this.progressInterval = setInterval(this.setProgress,500);
     this.handleComplete();
-    this.handleException();
+    // this.handleException();
   }
 
 }

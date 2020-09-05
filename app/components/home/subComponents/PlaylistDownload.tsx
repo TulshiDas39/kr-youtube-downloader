@@ -10,7 +10,7 @@ import { SingleVideo } from "./SingleVideo";
 export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps,IPlaylistDownloadState>{
   readonly maxHeight='5rem';
   state:IPlaylistDownloadState={
-    currentDownloadIndex:0,
+    currentDownloadIndex:-1,
     videoList:[],
     expanded:true,
   }
@@ -18,7 +18,8 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
     onFetchVideo: Main_Events.ON_SINGLE_VIDEO_INFO_FETCH_COMPLETE+this.props.downloadInfo.id
   }
   fetchIndex = 0;
-  intervalFordDownload?:any;
+  readonly timeLimitForFetch = 30000;//second
+  readonly timeLimitForDownload = 1000*60*1;//in min
 
   render(){
     return (
@@ -60,7 +61,7 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
           <div className={`row ${this.state.expanded?'':'d-none'}`} style={{border:'5px solid green'}}>
                 {
                   this.state.videoList.map(v=>(
-                    <SingleVideo key={v.info.videoDetails.videoId} onComplete={this.handleDownloadComplete} singleVideo={{
+                    <SingleVideo key={v.info.videoDetails.videoId} onComplete={this.downloadNextVideo} singleVideo={{
                       id:v.info.videoDetails.videoId,
                       singleVideoInfo:v,
                     }} playlistId={this.props.downloadInfo.id} />
@@ -75,7 +76,7 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
   handleExpansion=()=>{
     this.setState({expanded:!this.state.expanded});
   }
-  handleDownloadComplete=()=>{
+  downloadNextVideo=()=>{
     if(this.state.currentDownloadIndex >= this.props.downloadInfo.playList?.info.items.length! - 1) return;
     var interval = setInterval(()=>{
       if(this.state.currentDownloadIndex < this.state.videoList.length-1) {
@@ -106,14 +107,18 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
       this.setState({
         videoList:[...this.state.videoList,data]
       },()=>{
-        if(this.state.currentDownloadIndex === 0)this.downloadVideo();
+        if(this.state.currentDownloadIndex === -1){
+          console.log('starting first downloading');
+          console.log(this.state);
+          this.downloadNextVideo();
+        }
       })
       this.fetchIndex++;
       if(this.fetchIndex < this.props.downloadInfo.playList?.info.items.length!) this.fetchVideoInfo()
     })
   }
 
-  handleFetchWaitLimitExit=()=>{
+  handleFetchTimeLimitExit=()=>{
     var prevFetchIndex = this.fetchIndex;
     var interval = setInterval(()=>{
       if(this.fetchIndex >= this.props.downloadInfo.playList?.info.items.length! -1){
@@ -126,7 +131,7 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
         this.fetchVideoInfo();
       }
       else prevFetchIndex=this.fetchIndex;
-    },20000)
+    },this.timeLimitForFetch)
   }
 
   downloadVideo=()=>{
@@ -138,11 +143,32 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
     }
     ipcRenderer.send(Renderer_Events.DOWNLOAD_PLALIST_VIDEO,data);
   }
+
+  handleDownloadTimeLimitExit=()=>{
+    var prevDownloadIndex = this.state.currentDownloadIndex;
+    var interval = setInterval(()=>{
+      if(this.state.currentDownloadIndex >= this.props.downloadInfo.playList?.info.items.length! -1){
+        clearInterval(interval);
+        return;
+      }
+      if(prevDownloadIndex === this.state.currentDownloadIndex){
+        console.log('download time limit exit');
+        this.downloadNextVideo();
+      }
+      else prevDownloadIndex=this.state.currentDownloadIndex;
+    },this.timeLimitForDownload)
+  }
+
+  handleTimeLimitExit=()=>{
+    this.handleFetchTimeLimitExit();
+    this.handleDownloadTimeLimitExit();
+  }
+
   componentDidMount(){
     console.log(this.props.downloadInfo);
     this.fetchVideoInfo();
-    this.handleFetchWaitLimitExit();
     this.handleFetchComplete();
+    this.handleTimeLimitExit();
   }
 }
 
