@@ -1,7 +1,7 @@
 {
   "name": "kr-youtube-downloader",
   "productName": "YoutubeDownloader",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Youtube downloader",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
@@ -284,7 +284,7 @@
     "regenerator-runtime": "^0.13.5",
     "source-map-support": "^0.5.19",
     "ytdl-core": "^3.2.0",
-    "ytpl": "^0.3.0"
+    "ytpl": "^1.0.1"
   },
   "devEngines": {
     "node": ">=7.x",

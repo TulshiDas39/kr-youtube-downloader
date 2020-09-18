@@ -77,25 +77,26 @@ export class DownloadManager{
   }
 
   async downloadPlaylist(url:string){
+    console.log('starting playlist download');
     FileManager.checkForWorksPace();
     const id = await ytpl.getPlaylistID(url);
-    ytpl(id,(err,result)=>{
-      if(err) console.log(err);
-      if(result){
-        const folderName = result.title.replace(this.charactersToAvoidInFileName,"_");
-        const downloadPath = path.join(ConstantMain.worksPaceDir,folderName);
-        FileManager.createDirIfNotExist(downloadPath);
-        const download:IDownload={
-          id:id,
-          inProgress:true,
-          playList:{
-            fetched:[],
-            info:result,
-            downloadPath:downloadPath
-          }
+    ytpl(id).then(result=>{
+      const folderName = result.title.replace(this.charactersToAvoidInFileName,"_");
+      const downloadPath = path.join(ConstantMain.worksPaceDir,folderName);
+      FileManager.createDirIfNotExist(downloadPath);
+      const download:IDownload={
+        id:id,
+        inProgress:true,
+        playList:{
+          fetched:[],
+          info:result,
+          downloadPath:downloadPath
         }
-        mainWindow?.webContents.send(Main_Events.ADD_PLAYLIST_DOWNLOAD_ITEM,download);
       }
+      mainWindow?.webContents.send(Main_Events.ADD_PLAYLIST_DOWNLOAD_ITEM,download);
+    }).catch(err=>{
+        console.error('error happend in playlist');
+        console.error(err);
     })
   }
 

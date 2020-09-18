@@ -55,7 +55,7 @@ export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
       if(this.props.inFetch.includes(id)) return;
       ipcRenderer.send(Renderer_Events.START_DOWNLOAD, this.state.url);
     }
-    else if(ytpl.validateURL(this.state.url)){
+    else if(ytpl.validateID(this.state.url)){
       id = await ytpl.getPlaylistID(this.state.url);
       if(this.props.inFetch.includes(id)) return;
       ipcRenderer.send(Renderer_Events.START_PLAYLIST_DOWNLOAD, this.state.url);
