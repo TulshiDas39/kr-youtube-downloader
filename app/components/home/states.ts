@@ -10,13 +10,9 @@ export interface IDownloadListState{
   newItemExist?:boolean;
 }
 
-export interface ISingleVideoState{
-  progress:number;
-  downloadComplete?:boolean;
-}
-
 export interface IHomeReducerState{
   inFetch:string[];
+  downloadIds:string[];
 }
 
 export interface IPlaylistDownloadState{

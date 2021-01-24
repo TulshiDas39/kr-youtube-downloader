@@ -1,7 +1,10 @@
 import { IModalReducerState, IAlertModalOptions } from "./states";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ModalName } from "../../../constants/constUi";
 
-const initiallState:IModalReducerState={}
+const initiallState:IModalReducerState={
+  openModals:[],
+}
 
 const ModalSlice = createSlice({
   initialState:initiallState,
@@ -17,6 +20,18 @@ const ModalSlice = createSlice({
       return {
         ...state,
         alertModal:undefined
+      }
+    },
+    openModal(state,action:PayloadAction<ModalName>){
+      return {
+        ...state,
+        openModals:[...state.openModals,action.payload]
+      }
+    },
+    hideModal(state,action:PayloadAction<ModalName>){
+      return {
+        ...state,
+        openModals: state.openModals.filter(x=>x !== action.payload)
       }
     }
   }

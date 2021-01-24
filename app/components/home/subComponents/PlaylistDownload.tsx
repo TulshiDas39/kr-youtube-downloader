@@ -173,5 +173,6 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
 }
 
 interface IPlaylistDownloadProps {
-  downloadInfo:IDownload;
+  // downloadInfo:IDownload;
+  id:strng;
 }
