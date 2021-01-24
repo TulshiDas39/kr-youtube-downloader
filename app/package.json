@@ -1,7 +1,7 @@
 {
   "name": "kr-youtube-downloader",
   "productName": "kr-youtube-downloader",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "An youtube downloader",
   "main": "./main.prod.js",
   "author": {

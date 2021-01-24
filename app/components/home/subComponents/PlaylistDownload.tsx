@@ -39,8 +39,8 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
             <Col xs={3} style={{maxHeight:this.maxHeight}}>
               <div className="d-flex">
                 <div style={{flexGrow:7}}>
-                  <p className="mb-0">{this.state.currentDownloadIndex+1} of {this.props.downloadInfo.playList?.info.total_items}</p>
-                  {this.state.currentDownloadIndex === this.props.downloadInfo.playList?.info.total_items &&
+                  <p className="mb-0">{this.state.currentDownloadIndex+1} of {this.props.downloadInfo.playList?.info.items.length}</p>
+                  {this.state.currentDownloadIndex === this.props.downloadInfo.playList?.info.items.length &&
                   <div>
                       <FaFolderOpen className="cursor-pointer h2" onClick={this.handleFolderClick} />
                   </div>
