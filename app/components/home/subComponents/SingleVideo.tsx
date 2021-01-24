@@ -19,11 +19,12 @@ export class SingleVideo extends React.PureComponent<ISingleVideoProps,ISingleVi
   fileSizeMB = Math.round(this.fileSize / this.MB)
 
   render(){
+    console.log(this.props);
     return(
       <Container className="border">
         <Row className="no-gutters overflow-hidden" style={{maxHeight:this.maxHeight}}>
           <Col xs={3} className="my-auto" style={{maxHeight:this.maxHeight}}>
-            <Image src={this.props.singleVideo.singleVideoInfo?.info.videoDetails.thumbnail.thumbnails[0].url} rounded className="w-100" />
+            <Image src={this.props.singleVideo.singleVideoInfo?.info.videoDetails.thumbnails[0].url} rounded className="w-100" />
           </Col>
           <Col xs={6} style={{maxHeight:this.maxHeight}}>
             <div className="d-flex flex-column">

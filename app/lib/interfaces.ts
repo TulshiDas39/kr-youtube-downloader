@@ -1,13 +1,13 @@
 import { videoInfo, videoFormat } from "ytdl-core";
 import { IStore } from "../store";
-import { result } from "ytpl";
+import { Result } from "ytpl";
 
 export interface IDownload{
   id:string;
   singleVideoInfo?:ISingleVideo;
   playList?:{
     fetched:ISingleVideo[];
-    info:result;
+    info:Result;
     downloadPath:string;
   };
   inProgress?:boolean;
