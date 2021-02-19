@@ -14,7 +14,7 @@ function DownloadListComponent(){
         {
           downloadIds.map(id=>{
             if(ytdl.validateID(id)) return (
-              <SingleVideo key={id} id={id} />
+              <SingleVideo key={id} id={id}  />
             )
             return <PlaylistDownload key={id} id={id} />
           })

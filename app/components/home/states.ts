@@ -1,5 +1,5 @@
 import { IDownload, ISingleVideo } from "../../lib";
-import { videoInfo } from "ytdl-core";
+import { Result } from "ytpl";
 
 export interface IHomeState {
   url:string
@@ -19,4 +19,5 @@ export interface IPlaylistDownloadState{
   currentDownloadIndex:number;
   videoList:ISingleVideo[],
   expanded:boolean,
+  info?:Result
 }

@@ -5,6 +5,7 @@ import { ipcRenderer } from "electron";
 import { Main_Events, Renderer_Events } from "../../../constants/constants";
 import {FaFolderOpen} from "react-icons/fa"
 import { useMultiState } from "../../common/hooks";
+import { Item } from "ytpl";
 
 const imgSrc = "https://cloudfour.com/examples/img-currentsrc/images/kitten-large.png";
 const downloadedSize:{[name:string]:number}={};
@@ -15,23 +16,36 @@ const MB = 1024*1024;
 
 interface IProps{
   id:string;
+  info?:Item;
+  startDownload?:boolean;
   // singleVideo:IDownload;
-  // playlistId?:string;
-  // onComplete:(id:string)=>void;
+  playlistId?:string;
+  onComplete?:(id:string)=>void;
 }
 
 interface ISingleVideoState{
   progressPercent:number;
   downloadComplete?:boolean;
-  fetchedInfo:ISingleVideo;
+  // fetchedInfo:ISingleVideo;
   inProgress:boolean;
   fileSizeMB:number;
+  title:string;
+  // duration:string;
+  thumbnailUrl:string;
+  contentLength:string;
+  downloadPath:string;
+  
 }
 
 const initialState = {
   progressPercent:0,
   inProgress:false,
-  fileSizeMB:0
+  fileSizeMB:0,
+  thumbnailUrl:"",
+  title:"",
+  downloadPath:"",
+  contentLength:"",
+
 } as ISingleVideoState;
 
 export function SingleVideo(props:IProps){
@@ -39,7 +53,7 @@ export function SingleVideo(props:IProps){
 
 
   const setProgress=()=>{
-    const progresss =  downloadedSize[props.id]/Number(state.fetchedInfo.format.contentLength);
+    const progresss =  downloadedSize[props.id]/Number(state.contentLength);
     setState({progressPercent: Math.round(progresss*100)});
   }
 
@@ -49,7 +63,7 @@ export function SingleVideo(props:IProps){
   },[state.inProgress]);
 
   const handleFolderClick=()=>{
-    ipcRenderer.send(Renderer_Events.OPEN_FOLDER,state.fetchedInfo.downloadPath);
+    ipcRenderer.send(Renderer_Events.OPEN_FOLDER,state.downloadPath);
   }
 
   const handleProgress=()=>{
@@ -79,15 +93,35 @@ export function SingleVideo(props:IProps){
 
        downloadedSize[props.id] = 0;
        handleProgress();
-       setState({fetchedInfo:item,fileSizeMB:fileSizeMB});
+      //  setState({fetchedInfo:item,fileSizeMB:fileSizeMB});
+      setState({
+        contentLength:item.format.contentLength,
+        downloadPath:item.downloadPath,
+        thumbnailUrl:item.info.videoDetails.thumbnails[0].url,
+        fileSizeMB:fileSizeMB
+      })
        handleComplete();
+    })
+  }
+
+  const showInfoFromProps=()=>{
+    if(!props.info) throw "props.info in null";
+    console.log(props.info);
+    setState({
+      title:props.info.title,
+      thumbnailUrl:props.info.thumbnails[0].url!,      
     })
   }
 
   useEffect(()=>{
     handleNewDownload();
-    ipcRenderer.send(Renderer_Events.START_DOWNLOAD, props.id);
+    if(!props.info) ipcRenderer.send(Renderer_Events.START_DOWNLOAD, props.id);
+    else showInfoFromProps();
   },[])
+
+  useEffect(()=>{
+    if(props.startDownload) ipcRenderer.send(Renderer_Events.START_DOWNLOAD, props.id);
+  },[props.startDownload])
   // componentDidMount(){
 
   //   console.log('mounting');
@@ -101,17 +135,17 @@ export function SingleVideo(props:IProps){
       <Container className="border">
         <Row className="no-gutters overflow-hidden" style={{maxHeight:maxHeight}}>
           <Col xs={3} className="my-auto" style={{maxHeight:maxHeight}}>
-            <Image src={state.fetchedInfo.info.videoDetails.thumbnails[0].url} rounded className="w-100" />
+            <Image src={state.thumbnailUrl} rounded className="w-100" />
           </Col>
           <Col xs={6} style={{maxHeight:maxHeight}}>
             <div className="d-flex flex-column">
               <div className="h-100">
-                <p className="smal">{state.fetchedInfo.info.videoDetails.title}</p>
+                <p className="smal">{state.title}</p>
               </div>
             </div>
           </Col>
           <Col xs={3} style={{maxHeight:maxHeight}}>
-            <p className="mb-0">{( Math.round(downloadedSize[props.id]/MB))}MB of {state.fileSizeMB} MB</p>
+            {!!state.inProgress && <p className="mb-0">{( Math.round(downloadedSize[props.id]/MB))}MB of {state.fileSizeMB} MB</p>}
             {state.downloadComplete &&
               <div>
               <FaFolderOpen className="cursor-pointer h2" onClick={handleFolderClick} />

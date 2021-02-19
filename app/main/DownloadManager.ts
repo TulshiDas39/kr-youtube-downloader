@@ -27,6 +27,7 @@ export class DownloadManager{
     this.handlePlaylistDownloadStart();
     this.handleVideoInfoFetch();
     this.hanldePlaylstVideoDownload();
+    this.handleFetchPlaylist();
   }
 
   handleDownloadStart(){
@@ -58,6 +59,11 @@ export class DownloadManager{
     })
   }
 
+  handleFetchPlaylist=()=>{
+    ipcMain.on(Renderer_Events.FETCH_PLAYLIST_INFO,(_e,id:string)=>{
+      this.fetchPlaylistInfo(id);
+    })
+  }
 
   hanldePlaylstVideoDownload=()=>{
     ipcMain.on(Renderer_Events.DOWNLOAD_PLALIST_VIDEO,(_e,info:IPlaylistVideo)=>{
@@ -74,6 +80,20 @@ export class DownloadManager{
       const download_path  = path.join(this.workspacePath,fileName);
       this.downloadVideoFromInfo(info,download_path);
     });
+  }
+
+  async fetchPlaylistInfo(id:string){
+    console.log('Fetching playlist info');
+    // const id = await ytpl.getPlaylistID(url);
+    ytpl(id).then(result=>{
+      // const folderName = result.title.replace(this.charactersToAvoidInFileName,"_");
+      // const downloadPath = path.join(ConstantMain.worksPaceDir,folderName);
+      // FileManager.createDirIfNotExist(downloadPath);
+      mainWindow?.webContents.send(Main_Events.HANDLE_PLAYLIST_FETCH_COMPLETE_+id,result);
+    }).catch(err=>{
+        console.error('error happend in playlist fetch');
+        console.error(err);
+    })
   }
 
   async downloadPlaylist(url:string){
