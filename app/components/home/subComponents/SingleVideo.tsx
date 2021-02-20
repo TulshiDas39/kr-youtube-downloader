@@ -69,11 +69,8 @@ export function SingleVideo(props:IProps){
     let progressChannel = Main_Events.HANDLE_PROGRESS_+props.id;
     if(props.playlistId) progressChannel+=props.playlistId;
     ipcRenderer.on(progressChannel,(_,progress:IProgress)=>{
-      console.log(progress);
       downloadedSize[props.id]+=progress.chunkSize;
-      console.log(downloadedSize[props.id]);
       let percent = Math.round((downloadedSize[props.id]/state.contentLength)*100);
-      console.log(state.contentLength);
       if(percent > 100) percent = 100;
       if(state.progressPercent < percent) setState({progressPercent:percent});
     })
@@ -100,7 +97,8 @@ export function SingleVideo(props:IProps){
     ipcRenderer.on(Main_Events.HANDLE_SINGLE_VIDEO_FETCH_COMPLETE_+props.id,(_,info:videoInfo)=>{
       if(state.fetchedInfo) return;
       const selectedFormat = info.formats.find(x=>x.itag === defaultVideoFormat.itag) || info.formats[0];
-      console.log(info.formats);
+      const fileSize = parseInt(selectedFormat.contentLength!);
+      const fileSizeMB = Math.round(fileSize / MB);
       setState({
         fetchedInfo:info,
         title:info.videoDetails.title,
@@ -108,6 +106,7 @@ export function SingleVideo(props:IProps){
         videoFormats:info.formats,
         contentLength: Number(selectedFormat.contentLength),
         selectedVideoFormat:selectedFormat,
+        fileSizeMB:fileSizeMB,
       })
     })
   }
