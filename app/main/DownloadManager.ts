@@ -4,7 +4,7 @@ import path from "path";
 import ytdl, {videoFormat, videoInfo} from "ytdl-core";
 import fs from "fs";
 import { mainWindow } from "../main.dev";
-import { ISingleVideo, IProgress, IDownload, IFetch, IPlaylistVideo, ISingleVideoDownloadFromInfo } from "../lib";
+import { ISingleVideo, IProgress, IDownload, IFetch, IPlaylistVideo, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted } from "../lib";
 import { FileManager } from "./FileManager";
 import { ConstantMain } from "../constants/constantMain";
 import ytpl from "ytpl";
@@ -42,6 +42,10 @@ export class DownloadManager{
       let fileName = data.info.videoDetails.title.toString()?.replace(this.charactersToAvoidInFileName,"_");
       fileName += `.${data.selectedVideoFormat.container}`
       const download_path  = path.join(this.workspacePath,fileName);
+      const downloadStartedData:ISingleVideoDownloadStarted={
+        downloadPath:download_path,
+      }
+      mainWindow?.webContents.send(Main_Events.HANDLE_SINGLE_VIDEO_DOWNLOAD_STARTED_+data.info.videoDetails.videoId,downloadStartedData);
       this.downloadVideoFromInfo(data.info,data.selectedVideoFormat,download_path);
     })
   }

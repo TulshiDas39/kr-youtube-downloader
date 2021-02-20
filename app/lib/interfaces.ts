@@ -40,3 +40,7 @@ export interface ISingleVideoDownloadFromInfo{
   info:videoInfo;
   selectedVideoFormat:videoFormat;
 }
+
+export interface ISingleVideoDownloadStarted{
+  downloadPath:string;
+}

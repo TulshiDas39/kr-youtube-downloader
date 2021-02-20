@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Container, Row, Col, Image, ProgressBar, Dropdown, Button, } from "react-bootstrap";
-import { IProgress, ISingleVideo, ISingleVideoDownloadFromInfo } from "../../../lib";
+import { IProgress, ISingleVideo, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted } from "../../../lib";
 import { ipcRenderer } from "electron";
 import { Main_Events, Renderer_Events } from "../../../constants/constants";
 import {FaFolderOpen} from "react-icons/fa"
@@ -63,7 +63,8 @@ export function SingleVideo(props:IProps){
     if(props.playlistId) progressChannel+=props.playlistId;
     ipcRenderer.on(progressChannel,(_,progress:IProgress)=>{
       downloadedSize[props.id]+=progress.chunkSize;
-      const percent = Math.round((downloadedSize[props.id]/state.contentLength)*100);
+      let percent = Math.round((downloadedSize[props.id]/state.contentLength)*100);
+      if(percent > 100) percent = 100;
       if(state.progressPercent < percent) setState({progressPercent:percent});
     })
   }
@@ -97,6 +98,12 @@ export function SingleVideo(props:IProps){
       })
     })
   }
+
+  const handleDownloadStarted=()=>{
+    ipcRenderer.on(Main_Events.HANDLE_SINGLE_VIDEO_DOWNLOAD_STARTED_+props.id,(_,data:ISingleVideoDownloadStarted)=>{
+      setState({downloadPath:data.downloadPath});
+    })
+  }
   // const setProgressUpdater=()=>{
   //   progressIimers[props.id] = setInterval(setProgress,500);
   // }
@@ -107,7 +114,8 @@ export function SingleVideo(props:IProps){
       selectedVideoFormat:state.selectedVideoFormat,
     }
     setState({inProgress:true,contentLength:Number(state.selectedVideoFormat.contentLength)});
-    // setProgressUpdater();
+    
+    handleDownloadStarted();
     handleProgress();
     handleComplete();
     ipcRenderer.send(Renderer_Events.DOWNLOAD_SINGLE_VIDEO_FROM_INFO,data);
