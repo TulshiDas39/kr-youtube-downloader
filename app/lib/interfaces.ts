@@ -20,7 +20,6 @@ export interface ISingleVideo{
 
 export interface IProgress{
   singleVideoId:string;
-  playlistId?:string;
   chunkSize:number;
 }
 
@@ -35,4 +34,9 @@ export interface IFetch{
 export interface IPlaylistVideo{
   video:ISingleVideo,
   playlistId:string,
+}
+
+export interface ISingleVideoDownloadFromInfo{
+  info:videoInfo;
+  selectedVideoFormat:videoFormat;
 }
