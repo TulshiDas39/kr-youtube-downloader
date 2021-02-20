@@ -93,7 +93,6 @@ export class DownloadManager{
   }
 
   async fetchPlaylistInfo(id:string){
-    console.log('Fetching playlist info');
     // const id = await ytpl.getPlaylistID(url);
     ytpl(id).then(result=>{
       // const folderName = result.title.replace(this.charactersToAvoidInFileName,"_");
@@ -107,7 +106,6 @@ export class DownloadManager{
   }
 
   async downloadPlaylist(url:string){
-    console.log('starting playlist download');
     FileManager.checkForWorksPace();
     const id = await ytpl.getPlaylistID(url);
     ytpl(id).then(result=>{
@@ -132,7 +130,6 @@ export class DownloadManager{
 
 
   downloadVideoFromInfo(info:videoInfo,formate:videoFormat,downloadPath:string,playlistId?:string){
-    console.log('downloading video from info');
     // const formate = info.formats.find(x=>x.itag === this.formate);
     const video = ytdl.downloadFromInfo(info,{quality:formate.itag});
     // let fileName = info.videoDetails.title.toString()?.replace(this.charactersToAvoidInFileName,"_");
@@ -154,13 +151,11 @@ export class DownloadManager{
         chunkSize:chunkSize,
         singleVideoId:info.videoDetails.videoId
       }
-      console.log('progress');
       mainWindow?.webContents.send(progressChannel,progress);
     })
     let completeChannel = Main_Events.HANDLE_COMPLETE_+info.videoDetails.videoId;
     if(playlistId)completeChannel+=playlistId;
     video.on('end',()=>{
-      console.log('download completed');
       let progress:IProgress={
         chunkSize:0,
         singleVideoId:info.videoDetails.videoId

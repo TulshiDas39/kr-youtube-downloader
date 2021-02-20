@@ -59,16 +59,11 @@ export function SingleVideo(props:IProps){
   }
 
   const handleProgress=()=>{
-    console.log('handleProgress');
     let progressChannel = Main_Events.HANDLE_PROGRESS_+props.id;
     if(props.playlistId) progressChannel+=props.playlistId;
-    console.log(progressChannel);
     ipcRenderer.on(progressChannel,(_,progress:IProgress)=>{
       downloadedSize[props.id]+=progress.chunkSize;
-      console.log(state.contentLength);
-      // const increased = state.contentLengthInNumber - downloadedSize[props.id];
       const percent = Math.round((downloadedSize[props.id]/state.contentLength)*100);
-      console.log(percent);
       if(state.progressPercent < percent) setState({progressPercent:percent});
     })
   }
@@ -77,7 +72,6 @@ export function SingleVideo(props:IProps){
     let completeChannel = Main_Events.HANDLE_COMPLETE_+props.id;
     if(props.playlistId)completeChannel+=props.playlistId;
     ipcRenderer.on(completeChannel,(_,progress:IProgress)=>{
-        console.log('onComplete');
         setState({downloadComplete:true,inProgress:false,progressPercent:100});
         props.onComplete?.(props.id);      
     })
@@ -85,7 +79,6 @@ export function SingleVideo(props:IProps){
 
   const showInfoFromProps=()=>{
     if(!props.info) throw "props.info in null";
-    console.log(props.info);
     setState({
       title:props.info.title,
       thumbnailUrl:props.info.thumbnails[0].url!,      
