@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Container, Row, Col, Image, ProgressBar, Dropdown, Button, } from "react-bootstrap";
-import { IProgress, ISingleVideo, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted } from "../../../lib";
+import { IProgress, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted } from "../../../lib";
 import { ipcRenderer } from "electron";
 import { Main_Events, Renderer_Events } from "../../../constants/constants";
 import {FaFolderOpen} from "react-icons/fa"
@@ -15,28 +15,33 @@ const maxHeight='5rem';
 const MB = 1024*1024;
 // const fileSize = parseInt(this.props.singleVideo.singleVideoInfo?.format.contentLength!);
 // const fileSizeMB = Math.round(fileSize / this.MB);
-
+const defaultVideoFormat={
+  itag:18,
+  container:'mp4',
+  qualityLabel:"360p",
+} as videoFormat;
 interface IProps{
   id:string;
   info?:Item;
   startDownload?:boolean;
-  // singleVideo:IDownload;
+  startFetch?:boolean;
   playlistId?:string;
   onComplete?:(id:string)=>void;
+  onFetchComplete?:(id:string)=>void;
+  downloadPath?:string;
 }
 
 interface ISingleVideoState{
   progressPercent:number;
-  downloadComplete?:boolean;
+  downloadComplete:boolean;
   fetchedInfo?:videoInfo;
   inProgress:boolean;
   fileSizeMB:number;
   title:string;
-  // duration:string;
   thumbnailUrl:string;
   contentLength:number;
   downloadPath:string;
-  videoFormats?:videoFormat[];
+  videoFormats:videoFormat[];
   selectedVideoFormat:videoFormat;
 }
 
@@ -45,12 +50,14 @@ const initialState = {
   inProgress:false,
   fileSizeMB:0,
   thumbnailUrl:"",
+  downloadComplete:false,
   title:"",
   downloadPath:"",
   contentLength:0,
-
+  videoFormats:[],
+  selectedVideoFormat:defaultVideoFormat,
 } as ISingleVideoState;
-const defaultFormate = 18;
+
 export function SingleVideo(props:IProps){
   const [state,setState] = useMultiState(initialState);
 
@@ -62,8 +69,11 @@ export function SingleVideo(props:IProps){
     let progressChannel = Main_Events.HANDLE_PROGRESS_+props.id;
     if(props.playlistId) progressChannel+=props.playlistId;
     ipcRenderer.on(progressChannel,(_,progress:IProgress)=>{
+      console.log(progress);
       downloadedSize[props.id]+=progress.chunkSize;
+      console.log(downloadedSize[props.id]);
       let percent = Math.round((downloadedSize[props.id]/state.contentLength)*100);
+      console.log(state.contentLength);
       if(percent > 100) percent = 100;
       if(state.progressPercent < percent) setState({progressPercent:percent});
     })
@@ -72,7 +82,7 @@ export function SingleVideo(props:IProps){
   const handleComplete=()=>{
     let completeChannel = Main_Events.HANDLE_COMPLETE_+props.id;
     if(props.playlistId)completeChannel+=props.playlistId;
-    ipcRenderer.on(completeChannel,(_,progress:IProgress)=>{
+    ipcRenderer.on(completeChannel,()=>{
         setState({downloadComplete:true,inProgress:false,progressPercent:100});
         props.onComplete?.(props.id);      
     })
@@ -82,12 +92,15 @@ export function SingleVideo(props:IProps){
     if(!props.info) throw "props.info in null";
     setState({
       title:props.info.title,
-      thumbnailUrl:props.info.thumbnails[0].url!,      
+      thumbnailUrl:props.info.thumbnails[0].url!,
+      selectedVideoFormat:defaultVideoFormat,
     })
   }
   const handleFetchComplete=()=>{
     ipcRenderer.on(Main_Events.HANDLE_SINGLE_VIDEO_FETCH_COMPLETE_+props.id,(_,info:videoInfo)=>{
-      const selectedFormat = info.formats.find(x=>x.itag === defaultFormate) || info.formats[0];
+      if(state.fetchedInfo) return;
+      const selectedFormat = info.formats.find(x=>x.itag === defaultVideoFormat.itag) || info.formats[0];
+      console.log(info.formats);
       setState({
         fetchedInfo:info,
         title:info.videoDetails.title,
@@ -100,18 +113,20 @@ export function SingleVideo(props:IProps){
   }
 
   const handleDownloadStarted=()=>{
-    ipcRenderer.on(Main_Events.HANDLE_SINGLE_VIDEO_DOWNLOAD_STARTED_+props.id,(_,data:ISingleVideoDownloadStarted)=>{
+    let channel = Main_Events.HANDLE_SINGLE_VIDEO_DOWNLOAD_STARTED_+props.id;
+    if(props.playlistId) channel+=props.playlistId;
+    ipcRenderer.on(channel,(_,data:ISingleVideoDownloadStarted)=>{
       setState({downloadPath:data.downloadPath});
     })
   }
-  // const setProgressUpdater=()=>{
-  //   progressIimers[props.id] = setInterval(setProgress,500);
-  // }
-  const startDownload=()=>{
+  
+  const startDownloadVideo=()=>{
     if(!state.fetchedInfo) throw "state.fetchedInfo is undefined";
     let data:ISingleVideoDownloadFromInfo={
       info:state.fetchedInfo,
       selectedVideoFormat:state.selectedVideoFormat,
+      playlistId:props.playlistId,
+      downloadPath:props.downloadPath,
     }
     setState({inProgress:true,contentLength:Number(state.selectedVideoFormat.contentLength)});
     
@@ -120,18 +135,30 @@ export function SingleVideo(props:IProps){
     handleComplete();
     ipcRenderer.send(Renderer_Events.DOWNLOAD_SINGLE_VIDEO_FROM_INFO,data);
   }
+  const startFetchInfo=()=>{
+    ipcRenderer.send(Renderer_Events.FETCH_SINGLE_VIDEO_INFO, props.id);
+    handleFetchComplete();
+  }
   useEffect(()=>{
+    downloadedSize[props.id]=0;
     if(!props.info) {
-      downloadedSize[props.id]=0;
-      ipcRenderer.send(Renderer_Events.FETCH_SINGLE_VIDEO_INFO, props.id);
-      handleFetchComplete();
+      startFetchInfo();
     }
     else showInfoFromProps();
   },[])
 
   useEffect(()=>{
-    if(props.startDownload) ipcRenderer.send(Renderer_Events.START_DOWNLOAD, props.id);
-  },[props.startDownload])
+    if(props.startDownload && !!state.fetchedInfo) {
+      startDownloadVideo()
+    }
+    if(state.fetchedInfo){
+      props.onFetchComplete?.(props.id);
+    }
+  },[props.startDownload,state.fetchedInfo])
+
+  useEffect(()=>{
+    if(props.startFetch) startFetchInfo();
+  },[props.startFetch])
 
   if(!props.info && !state.title) return <p>Fetching...</p>
     return(
@@ -169,7 +196,7 @@ export function SingleVideo(props:IProps){
             </div>}
             {
               !state.inProgress && !!state.selectedVideoFormat && !state.downloadComplete &&
-              <Button className="ml-1" type="button" onClick={startDownload}><IoMdDownload /></Button>
+              <Button className="ml-1" type="button" onClick={startDownloadVideo}><IoMdDownload /></Button>
             }
           </Col>
         </Row>

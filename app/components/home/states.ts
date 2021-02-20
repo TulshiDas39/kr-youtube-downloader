@@ -1,5 +1,5 @@
 import { IDownload, ISingleVideo } from "../../lib";
-import { Result } from "ytpl";
+import { Item, Result } from "ytpl";
 
 export interface IHomeState {
   url:string
@@ -16,8 +16,11 @@ export interface IHomeReducerState{
 }
 
 export interface IPlaylistDownloadState{
-  currentDownloadIndex:number;
-  videoList:ISingleVideo[],
   expanded:boolean,
-  info?:Result
+  info?:Result,
+  donloadPath:string,
+  isDownloading:boolean,
+  fetchingItem?:Item,
+  downloadingItem?:Item,
+  downloadCompletedCount:number;
 }

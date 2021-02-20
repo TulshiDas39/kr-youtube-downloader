@@ -4,7 +4,7 @@ import path from "path";
 import ytdl, {videoFormat, videoInfo} from "ytdl-core";
 import fs from "fs";
 import { mainWindow } from "../main.dev";
-import { ISingleVideo, IProgress, IDownload, IFetch, IPlaylistVideo, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted } from "../lib";
+import { ISingleVideo, IProgress, IDownload, IFetch, IPlaylistVideo, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted, IPlaylistFetchComplete } from "../lib";
 import { FileManager } from "./FileManager";
 import { ConstantMain } from "../constants/constantMain";
 import ytpl from "ytpl";
@@ -41,12 +41,14 @@ export class DownloadManager{
     ipcMain.on(Renderer_Events.DOWNLOAD_SINGLE_VIDEO_FROM_INFO, (_,data:ISingleVideoDownloadFromInfo) => {
       let fileName = data.info.videoDetails.title.toString()?.replace(this.charactersToAvoidInFileName,"_");
       fileName += `.${data.selectedVideoFormat.container}`
-      const download_path  = path.join(this.workspacePath,fileName);
+      const download_path  = path.join((data.downloadPath || this.workspacePath),fileName);
       const downloadStartedData:ISingleVideoDownloadStarted={
-        downloadPath:download_path,
+        downloadPath: download_path,
       }
-      mainWindow?.webContents.send(Main_Events.HANDLE_SINGLE_VIDEO_DOWNLOAD_STARTED_+data.info.videoDetails.videoId,downloadStartedData);
-      this.downloadVideoFromInfo(data.info,data.selectedVideoFormat,download_path);
+      let downloadStartedChannel = Main_Events.HANDLE_SINGLE_VIDEO_DOWNLOAD_STARTED_+data.info.videoDetails.videoId;
+      if(data.playlistId)downloadStartedChannel+=data.playlistId;
+      mainWindow?.webContents.send(downloadStartedChannel,downloadStartedData);
+      this.downloadVideoFromInfo(data.info,data.selectedVideoFormat,download_path,data.playlistId);
     })
   }
 
@@ -99,10 +101,14 @@ export class DownloadManager{
   async fetchPlaylistInfo(id:string){
     // const id = await ytpl.getPlaylistID(url);
     ytpl(id).then(result=>{
-      // const folderName = result.title.replace(this.charactersToAvoidInFileName,"_");
-      // const downloadPath = path.join(ConstantMain.worksPaceDir,folderName);
-      // FileManager.createDirIfNotExist(downloadPath);
-      mainWindow?.webContents.send(Main_Events.HANDLE_PLAYLIST_FETCH_COMPLETE_+id,result);
+      const folderName = result.title.replace(this.charactersToAvoidInFileName,"_");
+      const downloadPath = path.join(ConstantMain.worksPaceDir,folderName);
+      FileManager.createDirIfNotExist(downloadPath);
+      let data:IPlaylistFetchComplete={
+        result: result,
+        downloadPath:downloadPath,
+      }
+      mainWindow?.webContents.send(Main_Events.HANDLE_PLAYLIST_FETCH_COMPLETE_+id,data);
     }).catch(err=>{
         console.error('error happend in playlist fetch');
         console.error(err);

@@ -39,8 +39,15 @@ export interface IPlaylistVideo{
 export interface ISingleVideoDownloadFromInfo{
   info:videoInfo;
   selectedVideoFormat:videoFormat;
+  playlistId?:string;
+  downloadPath?:string;
 }
 
 export interface ISingleVideoDownloadStarted{
+  downloadPath:string;
+}
+
+export interface IPlaylistFetchComplete{
+  result: Result;
   downloadPath:string;
 }
