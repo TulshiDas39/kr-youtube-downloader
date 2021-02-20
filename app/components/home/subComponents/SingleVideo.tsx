@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo } from "react";
-import { Container, Row, Col, Image, ProgressBar, } from "react-bootstrap";
+import { Container, Row, Col, Image, ProgressBar, Dropdown, } from "react-bootstrap";
 import { IProgress, ISingleVideo } from "../../../lib";
 import { ipcRenderer } from "electron";
 import { Main_Events, Renderer_Events } from "../../../constants/constants";
 import {FaFolderOpen} from "react-icons/fa"
 import { useMultiState } from "../../common/hooks";
 import { Item } from "ytpl";
+import { videoFormat, videoInfo } from "ytdl-core";
 
 const imgSrc = "https://cloudfour.com/examples/img-currentsrc/images/kitten-large.png";
 const downloadedSize:{[name:string]:number}={};
@@ -34,7 +35,8 @@ interface ISingleVideoState{
   thumbnailUrl:string;
   contentLength:string;
   downloadPath:string;
-  
+  videoFormats?:videoFormat[];
+  selectedVideoFormat:videoFormat;
 }
 
 const initialState = {
@@ -47,7 +49,7 @@ const initialState = {
   contentLength:"",
 
 } as ISingleVideoState;
-
+const defaultFormate = 18;
 export function SingleVideo(props:IProps){
   const [state,setState] = useMultiState(initialState);
 
@@ -112,10 +114,22 @@ export function SingleVideo(props:IProps){
       thumbnailUrl:props.info.thumbnails[0].url!,      
     })
   }
-
+  const handleFetchComplete=()=>{
+    ipcRenderer.on(Main_Events.HANDLE_SINGLE_VIDEO_FETCH_COMPLETE_+props.id,(_,info:videoInfo)=>{
+      setState({
+        title:info.videoDetails.title,
+        thumbnailUrl:info.videoDetails.thumbnails[0].url,
+        videoFormats:info.formats,
+        selectedVideoFormat:info.formats.find(x=>x.itag === defaultFormate) || info.formats[0]
+      })
+    })
+  }
   useEffect(()=>{
     handleNewDownload();
-    if(!props.info) ipcRenderer.send(Renderer_Events.START_DOWNLOAD, props.id);
+    if(!props.info) {
+      ipcRenderer.send(Renderer_Events.FETCH_SINGLE_VIDEO_INFO, props.id);
+      handleFetchComplete();
+    }
     else showInfoFromProps();
   },[])
 
@@ -131,21 +145,36 @@ export function SingleVideo(props:IProps){
   //   // this.handleException();
   // }
 
+  if(!props.info && !state.title) return <p>Fetching...</p>
     return(
       <Container className="border">
-        <Row className="no-gutters overflow-hidden" style={{maxHeight:maxHeight}}>
-          <Col xs={3} className="my-auto" style={{maxHeight:maxHeight}}>
-            <Image src={state.thumbnailUrl} rounded className="w-100" />
+        <Row className="no-gutters " style={{height:maxHeight}}>
+          <Col xs={3} className="my-auto h-100">
+            <Image src={state.thumbnailUrl} rounded className="w-100 h-100" />
           </Col>
-          <Col xs={6} style={{maxHeight:maxHeight}}>
+          <Col xs={6} className="h-100">
             <div className="d-flex flex-column">
               <div className="h-100">
                 <p className="smal">{state.title}</p>
               </div>
             </div>
           </Col>
-          <Col xs={3} style={{maxHeight:maxHeight}}>
+          <Col xs={3} className="h-100">
             {!!state.inProgress && <p className="mb-0">{( Math.round(downloadedSize[props.id]/MB))}MB of {state.fileSizeMB} MB</p>}
+            {!!state.selectedVideoFormat && <div>
+              <Dropdown>
+                <Dropdown.Toggle>
+                  {state.selectedVideoFormat.container}-{state.selectedVideoFormat.itag}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {state.videoFormats?.map((x,index)=>(
+                    <Dropdown.Item key={index+""} onClick={()=>setState({selectedVideoFormat:x})}>
+                      {x.container}-{x.itag}
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
+            </div> }
             {state.downloadComplete &&
               <div>
               <FaFolderOpen className="cursor-pointer h2" onClick={handleFolderClick} />

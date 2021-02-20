@@ -25,7 +25,7 @@ export class DownloadManager{
   handleRendererEvents(){
     this.handleDownloadStart();
     this.handlePlaylistDownloadStart();
-    this.handleVideoInfoFetch();
+    this.handleSingleVideoInfoFetch();
     this.hanldePlaylstVideoDownload();
     this.handleFetchPlaylist();
   }
@@ -42,19 +42,19 @@ export class DownloadManager{
     })
   }
 
-  handleVideoInfoFetch=()=>{
-    ipcMain.on(Renderer_Events.FETCH_SINGLE_VIDEO_INFO, (_event,info:IFetch) => {
+  handleSingleVideoInfoFetch=()=>{
+    ipcMain.on(Renderer_Events.FETCH_SINGLE_VIDEO_INFO, (_event,id:string) => {
 
-      ytdl.getInfo(Constants.URL_PREFIX+info.videoId).then(data=>{
-        let filename = data.videoDetails.title?.replace(this.charactersToAvoidInFileName,"_");
-        const formate = data.formats.find(x=>x.itag === this.formate);
-        filename += `.${formate?.container || "mp4"}`
-        const videoInfo:ISingleVideo={
-          downloadPath:path.join(info.playlistPath!,filename),
-          info:data,
-          format:formate!
-        }
-        mainWindow?.webContents.send(info.channel,videoInfo);
+      ytdl.getInfo(Constants.URL_PREFIX+id).then(data=>{
+        // let filename = data.videoDetails.title?.replace(this.charactersToAvoidInFileName,"_");
+        // const formate = data.formats.find(x=>x.itag === this.formate);
+        // filename += `.${formate?.container || "mp4"}`
+        // const videoInfo:ISingleVideo={
+        //   downloadPath:path.join(info.playlistPath!,filename),
+        //   info:data,
+        //   format:formate!
+        // }
+        mainWindow?.webContents.send(Main_Events.HANDLE_SINGLE_VIDEO_FETCH_COMPLETE_+id,data);
       });
     })
   }
