@@ -19,6 +19,7 @@ const defaultVideoFormat={
   itag:18,
   container:'mp4',
   qualityLabel:"360p",
+  mimeType:"video/mp4",
 } as videoFormat;
 interface IProps{
   id:string;
@@ -43,6 +44,7 @@ interface ISingleVideoState{
   downloadPath:string;
   videoFormats:videoFormat[];
   selectedVideoFormat:videoFormat;
+  formateText:string;
 }
 
 const initialState = {
@@ -56,6 +58,7 @@ const initialState = {
   contentLength:0,
   videoFormats:[],
   selectedVideoFormat:defaultVideoFormat,
+  formateText:"",
 } as ISingleVideoState;
 
 export function SingleVideo(props:IProps){
@@ -99,6 +102,7 @@ export function SingleVideo(props:IProps){
       const selectedFormat = info.formats.find(x=>x.itag === defaultVideoFormat.itag) || info.formats[0];
       const fileSize = parseInt(selectedFormat.contentLength!);
       const fileSizeMB = Math.round(fileSize / MB);
+      console.log(selectedFormat);
       setState({
         fetchedInfo:info,
         title:info.videoDetails.title,
@@ -118,6 +122,12 @@ export function SingleVideo(props:IProps){
       setState({downloadPath:data.downloadPath});
     })
   }
+
+  const getFormatTex=(selectedVideoFormat: videoFormat)=>{
+    const mimeText = selectedVideoFormat.mimeType?.split(";")?.[0] || "";
+    const formateText=`${mimeText}${selectedVideoFormat.qualityLabel?","+selectedVideoFormat.qualityLabel:""}`;
+    return formateText;
+  }
   
   const startDownloadVideo=()=>{
     if(!state.fetchedInfo) throw "state.fetchedInfo is undefined";
@@ -127,7 +137,12 @@ export function SingleVideo(props:IProps){
       playlistId:props.playlistId,
       downloadPath:props.downloadPath,
     }
-    setState({inProgress:true,contentLength:Number(state.selectedVideoFormat.contentLength)});
+    const formateText = getFormatTex(state.selectedVideoFormat);
+    setState({
+      inProgress:true,
+      contentLength:Number(state.selectedVideoFormat.contentLength),
+      formateText
+    });
     
     handleDownloadStarted();
     handleProgress();
@@ -158,6 +173,7 @@ export function SingleVideo(props:IProps){
   useEffect(()=>{
     if(props.startFetch) startFetchInfo();
   },[props.startFetch])
+  
 
   if(!props.info && !state.title) return <p>Fetching...</p>
     return(
@@ -175,20 +191,21 @@ export function SingleVideo(props:IProps){
           </Col>
           <Col xs={3} className="h-100">
             {!!state.inProgress && <p className="mb-0">{( Math.round(downloadedSize[props.id]/MB))}MB of {state.fileSizeMB} MB</p>}
-            {!!state.selectedVideoFormat && <div>
+            {!!state.selectedVideoFormat && !state.inProgress && <div>
               <Dropdown>
                 <Dropdown.Toggle>
-                  {state.selectedVideoFormat.container}-{state.selectedVideoFormat.itag}
+                  {getFormatTex(state.selectedVideoFormat)}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                   {state.videoFormats?.map((x,index)=>(
                     <Dropdown.Item key={index+""} onClick={()=>setState({selectedVideoFormat:x})}>
-                      {x.container}-{x.itag}
+                      {getFormatTex(x)}
                     </Dropdown.Item>
                   ))}
                 </Dropdown.Menu>
               </Dropdown>
             </div> }
+            {!!state.formateText && <p>{state.formateText}</p>}
             {state.downloadComplete &&
               <div>
               <FaFolderOpen className="cursor-pointer h2" onClick={handleFolderClick} />

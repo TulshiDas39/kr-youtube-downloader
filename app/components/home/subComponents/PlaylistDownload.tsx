@@ -80,6 +80,7 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
   startDownload=()=>{
     this.fetchNextVideo();
     this.downloadNextVideo();
+    this.setState({isDownloading:true});
   }
   handleExpansion=()=>{
     this.setState({expanded:!this.state.expanded});

@@ -40,7 +40,7 @@ export interface ISingleVideoDownloadFromInfo{
   info:videoInfo;
   selectedVideoFormat:videoFormat;
   playlistId?:string;
-  downloadPath?:string;
+  downloadPath?:string;  
 }
 
 export interface ISingleVideoDownloadStarted{
