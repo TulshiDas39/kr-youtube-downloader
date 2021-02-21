@@ -44,11 +44,6 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
               <div className="d-flex">
                 <div style={{flexGrow:7}}>
                   <p className="mb-0">{this.state.completedIds.length} of {this.state.info.items.length}</p>
-                  {this.state.completedIds.length === this.state.info.items.length &&
-                  <div>
-                      <FaFolderOpen className="cursor-pointer h2" />
-                  </div>
-                  }
                   {!this.state.isDownloading &&
                   <Button className="ml-1" type="button" title="Start download" onClick={this.startDownload}><FaSortAmountDown /></Button>}
                 </div>
