@@ -1,12 +1,12 @@
 import React from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { IPlaylistDownloadState } from "../states";
-import { FaFolderOpen, FaAngleDown, FaAngleUp } from "react-icons/fa";
+import { FaFolderOpen, FaAngleDown, FaAngleUp, FaSortAmountDown } from "react-icons/fa";
 import { ipcRenderer } from "electron";
 import { Renderer_Events, Main_Events } from "../../../constants/constants";
 import { SingleVideo } from "./SingleVideo";
-import { IoMdDownload } from "react-icons/io";
 import { IPlaylistFetchComplete } from "../../../lib";
+import { Item } from "ytpl";
 
 export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps,IPlaylistDownloadState>{
   readonly maxHeight='5rem';
@@ -14,7 +14,7 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
     expanded:true,
     isDownloading:false,
     donloadPath:"",
-    downloadCompletedCount:0,
+    completedIds:[],
   }
   readonly channels = {
     onFetchVideo: Main_Events.ON_SINGLE_VIDEO_INFO_FETCH_COMPLETE+this.props.id
@@ -43,14 +43,14 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
             <Col xs={3} style={{maxHeight:this.maxHeight}}>
               <div className="d-flex">
                 <div style={{flexGrow:7}}>
-                  <p className="mb-0">{this.state.downloadCompletedCount} of {this.state.info.items.length}</p>
-                  {this.state.downloadCompletedCount === this.state.info.items.length &&
+                  <p className="mb-0">{this.state.completedIds.length} of {this.state.info.items.length}</p>
+                  {this.state.completedIds.length === this.state.info.items.length &&
                   <div>
                       <FaFolderOpen className="cursor-pointer h2" />
                   </div>
                   }
                   {!this.state.isDownloading &&
-                  <Button className="ml-1" type="button" onClick={this.startDownload}><IoMdDownload /></Button>}
+                  <Button className="ml-1" type="button" title="Start download" onClick={this.startDownload}><FaSortAmountDown /></Button>}
                 </div>
                 <div className="d-flex align-items-center justify-content-center" style={{flexGrow:3}}>
                   <span className="rounded-circle p-1 hover-circle cursor-pointer" onClick={this.handleExpansion}>
@@ -67,7 +67,7 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
           <div className={`row ${this.state.expanded?'':'d-none'}`} style={{border:'5px solid green'}}>
                 {
                   this.state.info.items.map(v=>(
-                    <SingleVideo key={v.id} onComplete={this.downloadNextVideo} id={v.id} playlistId={this.props.id}
+                    <SingleVideo key={v.id} onComplete={()=>this.handleSingleVideoDownloadComplete(v)} id={v.id} playlistId={this.props.id}
                        info={v} startDownload={this.state.downloadingItem?.id === v.id} startFetch={this.state.fetchingItem?.id === v.id}
                        downloadPath={this.state.donloadPath} onFetchComplete={this.fetchNextVideo} />
                   ))
@@ -77,8 +77,13 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
       </div>
     )
   }
+  handleSingleVideoDownloadComplete=(item:Item)=>{
+    if(!this.state.completedIds.includes(item.id)) {
+      this.setState({completedIds:[...this.state.completedIds,item.id]});
+    }
+    this.downloadNextVideo();
+  }
   startDownload=()=>{
-    this.fetchNextVideo();
     this.downloadNextVideo();
     this.setState({isDownloading:true});
   }
@@ -95,7 +100,7 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
     if(!this.state.info) return;
     let downloadingIndex = this.state.info.items.findIndex(x=>x.id === this.state.downloadingItem?.id);
     downloadingIndex++;
-    this.setState({downloadingItem:this.state.info.items[downloadingIndex],downloadCompletedCount:this.state.downloadCompletedCount+1});
+    this.setState({downloadingItem:this.state.info.items[downloadingIndex]});
     // if(this.state.currentDownloadIndex >= this.state.info?.items.length! - 1) return;
 
     // var interval = setInterval(()=>{
@@ -192,8 +197,9 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
   }
 
   handlePlaylistFetchComplete=()=>{
-    ipcRenderer.on(Main_Events.HANDLE_PLAYLIST_FETCH_COMPLETE_+this.props.id,(_e, data: IPlaylistFetchComplete)=>{
+    ipcRenderer.on(Main_Events.HANDLE_PLAYLIST_FETCH_COMPLETE_+this.props.id,(_e, data: IPlaylistFetchComplete)=>{      
       this.setState({info:data.result,donloadPath:data.downloadPath});
+      this.setState({fetchingItem:data.result.items[0]});
     })
   }
 

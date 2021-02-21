@@ -45,6 +45,7 @@ interface ISingleVideoState{
   videoFormats:videoFormat[];
   selectedVideoFormat:videoFormat;
   formateText:string;
+  startDownload:boolean;
 }
 
 const initialState = {
@@ -59,6 +60,7 @@ const initialState = {
   videoFormats:[],
   selectedVideoFormat:defaultVideoFormat,
   formateText:"",
+  startDownload:false,
 } as ISingleVideoState;
 
 export function SingleVideo(props:IProps){
@@ -89,7 +91,10 @@ export function SingleVideo(props:IProps){
   }
 
   const showInfoFromProps=()=>{
-    if(!props.info) throw "props.info in null";
+    if(!props.info) {
+      console.error("props.info in null");
+      return;
+    }
     setState({
       title:props.info.title,
       thumbnailUrl:props.info.thumbnails[0].url!,
@@ -102,7 +107,6 @@ export function SingleVideo(props:IProps){
       const selectedFormat = info.formats.find(x=>x.itag === defaultVideoFormat.itag) || info.formats[0];
       const fileSize = parseInt(selectedFormat.contentLength!);
       const fileSizeMB = Math.round(fileSize / MB);
-      console.log(selectedFormat);
       setState({
         fetchedInfo:info,
         title:info.videoDetails.title,
@@ -112,6 +116,7 @@ export function SingleVideo(props:IProps){
         selectedVideoFormat:selectedFormat,
         fileSizeMB:fileSizeMB,
       })
+      props.onFetchComplete?.(props.id);
     })
   }
 
@@ -130,7 +135,10 @@ export function SingleVideo(props:IProps){
   }
   
   const startDownloadVideo=()=>{
-    if(!state.fetchedInfo) throw "state.fetchedInfo is undefined";
+    if(!state.fetchedInfo) {
+      console.error("state.fetchedInfo is undefined");
+      return;
+    }
     let data:ISingleVideoDownloadFromInfo={
       info:state.fetchedInfo,
       selectedVideoFormat:state.selectedVideoFormat,
@@ -156,22 +164,26 @@ export function SingleVideo(props:IProps){
   useEffect(()=>{
     downloadedSize[props.id]=0;
     if(!props.info) {
+      setState({startDownload:true});
       startFetchInfo();
     }
     else showInfoFromProps();
   },[])
 
   useEffect(()=>{
-    if(props.startDownload && !!state.fetchedInfo) {
+    if(state.startDownload && !!state.fetchedInfo) {
       startDownloadVideo()
     }
-    if(state.fetchedInfo){
-      props.onFetchComplete?.(props.id);
-    }
-  },[props.startDownload,state.fetchedInfo])
+  },[state.startDownload,state.fetchedInfo])
 
   useEffect(()=>{
-    if(props.startFetch) startFetchInfo();
+    if(props.startDownload && state.downloadComplete) props.onComplete?.(props.id);
+    else if(props.startDownload) setState({startDownload:true});
+  },[props.startDownload])
+
+  useEffect(()=>{
+    if(props.startFetch && state.fetchedInfo) props.onFetchComplete?.(props.id);
+    else if(props.startFetch) startFetchInfo();
   },[props.startFetch])
   
 
@@ -212,7 +224,7 @@ export function SingleVideo(props:IProps){
             </div>}
             {
               !state.inProgress && !!state.selectedVideoFormat && !state.downloadComplete &&
-              <Button className="ml-1" type="button" onClick={startDownloadVideo}><IoMdDownload /></Button>
+              <Button className="ml-1 mt-1 small" type="button" title="Download" onClick={()=>setState({startDownload:true})}><IoMdDownload /></Button>
             }
           </Col>
         </Row>

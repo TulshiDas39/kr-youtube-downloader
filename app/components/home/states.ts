@@ -22,5 +22,5 @@ export interface IPlaylistDownloadState{
   isDownloading:boolean,
   fetchingItem?:Item,
   downloadingItem?:Item,
-  downloadCompletedCount:number;
+  completedIds:string[];
 }
