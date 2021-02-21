@@ -1,4 +1,4 @@
-import { IDownload, ISingleVideo } from "../../lib";
+import { IDownload } from "../../lib";
 import { Item, Result } from "ytpl";
 
 export interface IHomeState {

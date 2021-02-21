@@ -1,11 +1,8 @@
 import React, { ChangeEvent, FormEvent } from "react";
 import { Button, Form } from 'react-bootstrap';
-import {IoMdDownload} from 'react-icons/io'
+import {AiOutlinePlus} from 'react-icons/ai'
 import { IHomeState } from "./states";
-import { ipcRenderer } from "electron";
-import { Renderer_Events } from "../../constants/constants";
 import { DownloadList } from "./subComponents/DownloadList";
-import { Helper } from "../../lib/helpers";
 import ytdl from "ytdl-core";
 import { connect, ConnectedProps } from "react-redux";
 import { ActionModal } from "../common/Modals";
@@ -15,6 +12,7 @@ import { IReduxState } from "../../lib";
 import ytpl from "ytpl";
 import { ModalData } from "../common/Modals/ModalData";
 import { ModalName } from "../../constants/constUi";
+import './home.css';
 
 export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
   state:IHomeState = {
@@ -23,7 +21,7 @@ export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
 
   render(){
     return (
-      <div className="container text-center">
+      <div className="container text-center homeComponent">
         <h1 className="test">kr-youtube-downloader</h1>
         <Form onSubmit={this.handleSubmit}>
           <Form.Group controlId="exampleForm.ControlInput1">
@@ -33,7 +31,7 @@ export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
               {/* <Button className="ml-1" type="submit"><IoMdDownload /></Button> */}
               {
                 this.props.inFetch.length ? <GiEuropeanFlag className="icon-spin h1"/>:
-                <Button className="ml-1" type="submit"><IoMdDownload /></Button>
+                <Button className="ml-1" title="Fetch" type="submit"><AiOutlinePlus /></Button>
               }
             </div>
           </Form.Group>

@@ -191,12 +191,12 @@ export function SingleVideo(props:IProps){
           </Col>
           <Col xs={3} className="h-100">
             {!!state.inProgress && <p className="mb-0">{( Math.round(downloadedSize[props.id]/MB))}MB of {state.fileSizeMB} MB</p>}
-            {!!state.selectedVideoFormat && !state.inProgress && <div>
+            {!state.inProgress && !state.downloadComplete && <div>
               <Dropdown>
-                <Dropdown.Toggle>
+                <Dropdown.Toggle className="bg-success">
                   {getFormatTex(state.selectedVideoFormat)}
                 </Dropdown.Toggle>
-                <Dropdown.Menu>
+                <Dropdown.Menu className="formate-selection">
                   {state.videoFormats?.map((x,index)=>(
                     <Dropdown.Item key={index+""} onClick={()=>setState({selectedVideoFormat:x})}>
                       {getFormatTex(x)}
