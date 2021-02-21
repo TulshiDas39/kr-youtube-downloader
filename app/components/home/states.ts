@@ -1,5 +1,5 @@
-import { IDownload, ISingleVideo } from "../../lib";
-import { videoInfo } from "ytdl-core";
+import { IDownload } from "../../lib";
+import { Item, Result } from "ytpl";
 
 export interface IHomeState {
   url:string
@@ -10,17 +10,19 @@ export interface IDownloadListState{
   newItemExist?:boolean;
 }
 
-export interface ISingleVideoState{
-  progress:number;
-  downloadComplete?:boolean;
-}
-
 export interface IHomeReducerState{
   inFetch:string[];
+  downloadIds:string[];
 }
 
 export interface IPlaylistDownloadState{
-  currentDownloadIndex:number;
-  videoList:ISingleVideo[],
   expanded:boolean,
+  info?:Result,
+  donloadPath:string,
+  isDownloading:boolean,
+  fetchingItem?:Item,
+  downloadingItem?:Item,
+  completedIds:string[];
+  isAllSelected:boolean;
+  selectedVideoIds:string[]
 }

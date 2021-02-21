@@ -14,3 +14,4 @@ export default function createRootReducer(history: History) {
     home:HomeReducer,
   });
 }
+

@@ -5,6 +5,8 @@ import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
 // eslint-disable-next-line import/no-cycle
 import createRootReducer from './rootReducer';
+import { createSelectorHook } from 'react-redux';
+import { IReduxState } from './lib';
 
 export const history = createHashHistory();
 const rootReducer = createRootReducer(history);
@@ -45,3 +47,5 @@ export const configuredStore = (initialState?: RootState) => {
 };
 export type IStore = ReturnType<typeof configuredStore>;
 export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>;
+
+export const useSelectorTyped = createSelectorHook<IReduxState>();
