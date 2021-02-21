@@ -15,6 +15,8 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
     isDownloading:false,
     donloadPath:"",
     completedIds:[],
+    isAllSelected:true,
+    selectedVideoIds:[],
   }
   readonly channels = {
     onFetchVideo: Main_Events.ON_SINGLE_VIDEO_INFO_FETCH_COMPLETE+this.props.id
@@ -31,6 +33,12 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
         <Container className="border">
           <Row className="no-gutters overflow-hidden" style={{maxHeight:this.maxHeight}}>
             <Col xs={3} className="my-auto" style={{maxHeight:this.maxHeight}}>
+              <div className="d-flex align-items-center justify-content-center" >
+                  <span>
+                    <label htmlFor="selectAll" className="mr-1">All</label>
+                    <input id="selectAll" type="checkbox" checked={!!this.state.isAllSelected} onChange={()=>this.setIsAllSelected(!this.state.isAllSelected)} className="pt-1" />
+                  </span>
+              </div>
               {/* <Image src={this.props.downloadInfo.playList?.info.} rounded className="w-100" /> */}
             </Col>
             <Col xs={6} style={{maxHeight:this.maxHeight}}>
@@ -52,8 +60,7 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
                     {
                       this.state.expanded? <FaAngleUp />:<FaAngleDown />
                     }
-
-                  </span>
+                  </span>                  
                 </div>
               </div>
 
@@ -64,7 +71,8 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
                   this.state.info.items.map(v=>(
                     <SingleVideo key={v.id} onComplete={()=>this.handleSingleVideoDownloadComplete(v)} id={v.id} playlistId={this.props.id}
                        info={v} startDownload={this.state.downloadingItem?.id === v.id} startFetch={this.state.fetchingItem?.id === v.id}
-                       downloadPath={this.state.donloadPath} onFetchComplete={this.fetchNextVideo} />
+                       downloadPath={this.state.donloadPath} onFetchComplete={this.fetchNextVideo} isSelected={this.state.selectedVideoIds.includes(v.id)}
+                       handleSelectChange={(isSelected)=>this.changeSelection(v.id,isSelected)} />
                   ))
                 }
           </div>
@@ -72,11 +80,20 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
       </div>
     )
   }
+  changeSelection=(id:string,isSelected:boolean)=>{
+    let selectedVideoIds = [...this.state.selectedVideoIds,id];
+    if(!isSelected) selectedVideoIds = this.state.selectedVideoIds.filter(x=>x !== id);
+    this.setState({selectedVideoIds});
+  }
   handleSingleVideoDownloadComplete=(item:Item)=>{
     if(!this.state.completedIds.includes(item.id)) {
       this.setState({completedIds:[...this.state.completedIds,item.id]});
     }
     this.downloadNextVideo();
+  }
+  setIsAllSelected=(isAllSelected:boolean)=>{
+    const selectedVideoIds = isAllSelected?this.state.info?.items.map(x=>x.id) || []:[];
+    this.setState({isAllSelected,selectedVideoIds});
   }
   startDownload=()=>{
     this.downloadNextVideo();
@@ -94,7 +111,10 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
   downloadNextVideo=()=>{
     if(!this.state.info) return;
     let downloadingIndex = this.state.info.items.findIndex(x=>x.id === this.state.downloadingItem?.id);
-    downloadingIndex++;
+    do{
+      downloadingIndex++;
+      if(downloadingIndex >= this.state.info.items.length) return;
+    }while(!this.state.selectedVideoIds.includes(this.state.info.items[downloadingIndex].id));
     this.setState({downloadingItem:this.state.info.items[downloadingIndex]});    
   }
 
@@ -104,8 +124,12 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
 
   handlePlaylistFetchComplete=()=>{
     ipcRenderer.on(Main_Events.HANDLE_PLAYLIST_FETCH_COMPLETE_+this.props.id,(_e, data: IPlaylistFetchComplete)=>{      
-      this.setState({info:data.result,donloadPath:data.downloadPath});
-      this.setState({fetchingItem:data.result.items[0]});
+      this.setState({
+        info:data.result,donloadPath:data.downloadPath,
+        fetchingItem:data.result.items[0]
+      },()=>{
+        this.setIsAllSelected(true);
+      });
     })
   }
 

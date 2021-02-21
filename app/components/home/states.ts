@@ -23,4 +23,6 @@ export interface IPlaylistDownloadState{
   fetchingItem?:Item,
   downloadingItem?:Item,
   completedIds:string[];
+  isAllSelected:boolean;
+  selectedVideoIds:string[]
 }

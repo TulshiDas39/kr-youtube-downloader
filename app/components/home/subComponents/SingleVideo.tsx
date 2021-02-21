@@ -21,6 +21,7 @@ const defaultVideoFormat={
   qualityLabel:"360p",
   mimeType:"video/mp4",
 } as videoFormat;
+
 interface IProps{
   id:string;
   info?:Item;
@@ -30,6 +31,8 @@ interface IProps{
   onComplete?:(id:string)=>void;
   onFetchComplete?:(id:string)=>void;
   downloadPath?:string;
+  isSelected?:boolean;
+  handleSelectChange?:(isSelected:boolean)=>void;
 }
 
 interface ISingleVideoState{
@@ -192,7 +195,15 @@ export function SingleVideo(props:IProps){
       <Container className="border">
         <Row className="no-gutters " style={{height:maxHeight}}>
           <Col xs={3} className="my-auto h-100">
-            <Image src={state.thumbnailUrl} rounded className="w-100 h-100" />
+            <div className="d-flex h-100">
+              {!!props.playlistId && <div>
+                    <input id="selectAll" type="checkbox" checked={props.isSelected} onChange={()=>props.handleSelectChange?.(!props.isSelected)} className="pt-1" />
+              </div>}
+              <div className="flex-grow-1 h-100">
+                <Image src={state.thumbnailUrl} rounded className="w-100 h-100" />
+              </div>
+            </div>
+            
           </Col>
           <Col xs={6} className="h-100">
             <div className="d-flex flex-column">
