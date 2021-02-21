@@ -14,7 +14,7 @@ kr-youtube-downloader is a desktop application to download youtube videos from y
 ### Installation
 
 kr-youtube-downloader doesn't require any 3rd party dependencies to install.
- - click [here](https://github.com/TulshiDas39/kr-youtube-downloader/releases/download/v0.0.8/kr-youtube-downloader.Setup.0.0.5.exe) to download the installer.
+ - click [here](https://github.com/TulshiDas39/kr-youtube-downloader/releases/download/v0.0.9/kr-youtube-downloader.Setup.0.0.9.exe) to download the installer.
  - run the installer and complete the steps
  - to get the best speed exclude the installation folder in windows defender.
  - get step by step video guid [here](https://www.youtube.com/watch?v=ZRD9thyD48A)
