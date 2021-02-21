@@ -49,6 +49,7 @@ interface ISingleVideoState{
   selectedVideoFormat:videoFormat;
   formateText:string;
   startDownload:boolean;
+  isFetching:boolean;
 }
 
 const initialState = {
@@ -64,6 +65,7 @@ const initialState = {
   selectedVideoFormat:defaultVideoFormat,
   formateText:"",
   startDownload:false,
+  isFetching:false,
 } as ISingleVideoState;
 
 export function SingleVideo(props:IProps){
@@ -78,6 +80,7 @@ export function SingleVideo(props:IProps){
     if(props.playlistId) progressChannel+=props.playlistId;
     ipcRenderer.on(progressChannel,(_,progress:IProgress)=>{
       downloadedSize[props.id]+=progress.chunkSize;
+      if(downloadedSize[props.id]>state.contentLength)downloadedSize[props.id]=state.contentLength;
       let percent = Math.round((downloadedSize[props.id]/state.contentLength)*100);
       if(percent > 100) percent = 100;
       if(state.progressPercent < percent) setState({progressPercent:percent});
@@ -118,6 +121,7 @@ export function SingleVideo(props:IProps){
         contentLength: Number(selectedFormat.contentLength),
         selectedVideoFormat:selectedFormat,
         fileSizeMB:fileSizeMB,
+        isFetching:false,
       })
       props.onFetchComplete?.(props.id);
     })
@@ -161,7 +165,9 @@ export function SingleVideo(props:IProps){
     ipcRenderer.send(Renderer_Events.DOWNLOAD_SINGLE_VIDEO_FROM_INFO,data);
   }
   const startFetchInfo=()=>{
+    if(state.isFetching) return;
     ipcRenderer.send(Renderer_Events.FETCH_SINGLE_VIDEO_INFO, props.id);
+    setState({isFetching:true});
     handleFetchComplete();
   }
   useEffect(()=>{
@@ -189,7 +195,12 @@ export function SingleVideo(props:IProps){
     else if(props.startFetch) startFetchInfo();
   },[props.startFetch])
   
-
+  const hanldeFormateSelectionToogle=(isOpen:boolean)=>{
+    if(!isOpen) return;
+    if(!!state.fetchedInfo)return;
+    if(state.isFetching)return;
+    startFetchInfo();
+  }
   if(!props.info && !state.title) return <p>Fetching...</p>
     return(
       <Container className="border">
@@ -215,8 +226,8 @@ export function SingleVideo(props:IProps){
           <Col xs={3} className="h-100">
             {!!state.inProgress && <p className="mb-0">{( Math.round(downloadedSize[props.id]/MB))}MB of {state.fileSizeMB} MB</p>}
             {!state.inProgress && !state.downloadComplete && <div>
-              <Dropdown>
-                <Dropdown.Toggle className="bg-success">
+              <Dropdown onToggle={(isOpen)=>hanldeFormateSelectionToogle(isOpen)}>
+                <Dropdown.Toggle className="bg-success" >
                   {getFormatTex(state.selectedVideoFormat)}
                 </Dropdown.Toggle>
                 <Dropdown.Menu className="formate-selection">
@@ -225,6 +236,9 @@ export function SingleVideo(props:IProps){
                       {getFormatTex(x)}
                     </Dropdown.Item>
                   ))}
+                  {state.isFetching &&
+                    <Dropdown.Item>Fetching...</Dropdown.Item>
+                  }
                 </Dropdown.Menu>
               </Dropdown>
             </div> }
