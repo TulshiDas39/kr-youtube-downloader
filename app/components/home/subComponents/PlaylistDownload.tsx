@@ -52,8 +52,8 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
               <div className="d-flex">
                 <div style={{flexGrow:7}}>
                   <p className="mb-0">{this.state.completedIds.length} of {this.state.info.items.length}</p>
-                  {!this.state.isDownloading &&
-                  <Button className="ml-1" type="button" title="Start download" onClick={this.startDownload}><FaSortAmountDown /></Button>}
+                  {this.state.completedIds.length !== this.state.info.items.length &&
+                  <Button className="ml-1" type="button" title="Start download" disabled={!this.state.selectedVideoIds.length} onClick={this.startDownload}><FaSortAmountDown /></Button>}
                 </div>
                 <div className="d-flex align-items-center justify-content-center" style={{flexGrow:3}}>
                   <span className="rounded-circle p-1 hover-circle cursor-pointer" onClick={this.handleExpansion}>
@@ -96,8 +96,7 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
     this.setState({isAllSelected,selectedVideoIds});
   }
   startDownload=()=>{
-    this.downloadNextVideo();
-    this.setState({isDownloading:true});
+    this.setState({isDownloading:true,downloadingItem:undefined},()=>this.downloadNextVideo());
   }
   handleExpansion=()=>{
     this.setState({expanded:!this.state.expanded});
@@ -108,13 +107,19 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
     fetchingIndex++;
     this.setState({fetchingItem:this.state.info.items[fetchingIndex]});
   }
+  canDownload=(id:string)=>{
+    if(!this.state.info) return false;
+    if(!this.state.selectedVideoIds.includes(id))return false;
+    if(this.state.completedIds.includes(id)) return false;
+    return true;
+  }
   downloadNextVideo=()=>{
     if(!this.state.info) return;
     let downloadingIndex = this.state.info.items.findIndex(x=>x.id === this.state.downloadingItem?.id);
     do{
       downloadingIndex++;
       if(downloadingIndex >= this.state.info.items.length) return;
-    }while(!this.state.selectedVideoIds.includes(this.state.info.items[downloadingIndex].id));
+    }while(!this.canDownload(this.state.info.items[downloadingIndex].id));
     this.setState({downloadingItem:this.state.info.items[downloadingIndex]});    
   }
 
@@ -131,6 +136,17 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
         this.setIsAllSelected(true);
       });
     })
+  }
+
+  handleSelectionChange=()=>{
+     const isAllSelected = this.state.selectedVideoIds.length === this.state.info?.items.length;
+     this.setState({isAllSelected})
+  }
+
+  componentDidUpdate(_:any,prevState:IPlaylistDownloadState){
+    if(this.state.selectedVideoIds !== prevState.selectedVideoIds){
+      this.handleSelectionChange();
+    }
   }
 
   componentDidMount(){
