@@ -173,7 +173,7 @@ export function SingleVideo(props:IProps){
   useEffect(()=>{
     downloadedSize[props.id]=0;
     if(!props.info) {
-      setState({startDownload:true});
+      // setState({startDownload:true});
       startFetchInfo();
     }
     else showInfoFromProps();
