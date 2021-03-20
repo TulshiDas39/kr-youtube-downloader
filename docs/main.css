@@ -1,0 +1,16 @@
+*{
+    box-sizing: border-box;
+}
+body{
+    height: 100vh;
+    width: 100vw;
+}
+
+.topNav{
+    background-color: #2F6E91;
+    height: 5%;
+}
+.home{
+    height: 95%;
+    overflow: auto;
+}
