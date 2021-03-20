@@ -28,6 +28,7 @@
     "app/main.prod.js",
     "app/renderer.prod.js",
     "app/dist",
-    "dll"
+    "dll",
+    "docs"
   ]
 }
