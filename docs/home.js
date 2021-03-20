@@ -14,7 +14,6 @@ function HomeComponent() {
           <li>Download Selected videos from playlist</li>
           <li>Download parallelly playlist videos</li>
         </ul>
-        <div id="download" className="download"></div>
       </div>
     );  
 }
