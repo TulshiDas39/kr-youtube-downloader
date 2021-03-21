@@ -18,11 +18,11 @@
   <div id="topNav" class="topNav row g-0 text-white"></div>
 
   <div class="distributions row g-0">
-    <div class="col-4">
+    <div class="col-4" onclick="document.getElementById('window-dn').click()">
       <p class="text-center text-white">windows</p>
       <p class="text-center"><i class="fab fa-windows text-white h1"></i></p>
       <p class="text-center">
-        <a class="text-white" href="https://github.com/TulshiDas39/kr-youtube-downloader/releases/download/v1.0.0/kr-youtube-downloader.Setup.1.0.0.exe">
+        <a id="window-dn" class="text-white" href="https://github.com/TulshiDas39/kr-youtube-downloader/releases/download/v1.0.0/kr-youtube-downloader.Setup.1.0.0.exe">
           kr-youtube-downloader.Setup.1.0.0.exe
         </a>
       </p> 
@@ -37,6 +37,7 @@
     </div>
   </div>  
 
+  <script src="common.js"></script>
   <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
   <script type="text/babel" src="topNav.js"></script>
