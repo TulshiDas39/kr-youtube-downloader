@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Container, Row, Col, Image, ProgressBar, Dropdown, Button, } from "react-bootstrap";
-import { IProgress, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted } from "../../../lib";
+import { IProgress, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted, IVideoFormat, IVideoInfo } from "../../../lib";
 import { ipcRenderer } from "electron";
 import { Main_Events, Renderer_Events } from "../../../constants/constants";
 import {FaFolderOpen} from "react-icons/fa"
@@ -8,6 +8,7 @@ import { useMultiState } from "../../common/hooks";
 import { Item } from "ytpl";
 import { videoFormat, videoInfo } from "ytdl-core";
 import { IoMdDownload } from "react-icons/io";
+import { Helper } from "../../../lib/helpers";
 
 const imgSrc = "https://cloudfour.com/examples/img-currentsrc/images/kitten-large.png";
 const downloadedSize:{[name:string]:number}={};
@@ -38,15 +39,13 @@ interface IProps{
 interface ISingleVideoState{
   progressPercent:number;
   downloadComplete:boolean;
-  fetchedInfo?:videoInfo;
+  fetchedInfo?:IVideoInfo;
   inProgress:boolean;
-  fileSizeMB:number;
   title:string;
   thumbnailUrl:string;
-  contentLength:number;
   downloadPath:string;
   videoFormats:videoFormat[];
-  selectedVideoFormat:videoFormat;
+  selectedVideoFormat:IVideoFormat;
   formateText:string;
   startDownload:boolean;
   isFetching:boolean;
@@ -71,6 +70,22 @@ const initialState = {
 export function SingleVideo(props:IProps){
   const [state,setState] = useMultiState(initialState);
 
+  const fileSizeMB = useMemo(()=>{
+    if(!state.selectedVideoFormat) return 0;
+    return Math.round((+state.selectedVideoFormat.contentLength) / MB);
+  },[state.selectedVideoFormat?.contentLength])
+
+  const dataRef = useRef({fileSizeMB:0,contentLength:0});
+
+  useEffect(()=>{
+    if(state.selectedVideoFormat)
+      dataRef.current.contentLength = +state.selectedVideoFormat.contentLength;
+  },[state.selectedVideoFormat?.contentLength])
+  
+  useEffect(()=>{
+    dataRef.current.fileSizeMB = fileSizeMB;
+  },[fileSizeMB])
+
   const handleFolderClick=()=>{
     ipcRenderer.send(Renderer_Events.OPEN_FOLDER,state.downloadPath);
   }
@@ -80,8 +95,8 @@ export function SingleVideo(props:IProps){
     if(props.playlistId) progressChannel+=props.playlistId;
     ipcRenderer.on(progressChannel,(_,progress:IProgress)=>{
       downloadedSize[props.id]+=progress.chunkSize;
-      if(downloadedSize[props.id]>state.contentLength)downloadedSize[props.id]=state.contentLength;
-      let percent = Math.round((downloadedSize[props.id]/state.contentLength)*100);
+      if(downloadedSize[props.id]> dataRef.current.contentLength)downloadedSize[props.id]=dataRef.current.contentLength;
+      let percent = Math.round((downloadedSize[props.id]/dataRef.current.contentLength)*100);
       if(percent > 100) percent = 100;
       if(state.progressPercent < percent) setState({progressPercent:percent});
     })
@@ -108,19 +123,22 @@ export function SingleVideo(props:IProps){
     })
   }
   const handleFetchComplete=()=>{
-    ipcRenderer.on(Main_Events.HANDLE_SINGLE_VIDEO_FETCH_COMPLETE_+props.id,(_,info:videoInfo)=>{
+    const findDefaultFormat=(info:IVideoInfo)=>{
+      let mp4formats = info.formats.filter(x=>x.mimeType?.startsWith("video/mp4") && !x.isContentLengthCalculated );
+      mp4formats.sort((a,b)=> a > b?1:-1);
+      return mp4formats.find(x=> x.qualityLabel >= '360p')!;
+    }
+
+    ipcRenderer.on(Main_Events.HANDLE_SINGLE_VIDEO_FETCH_COMPLETE_+props.id,(_,info:IVideoInfo)=>{
       if(state.fetchedInfo) return;
-      const selectedFormat = info.formats.find(x=>x.itag === defaultVideoFormat.itag) || info.formats[0];
-      const fileSize = parseInt(selectedFormat.contentLength!);
-      const fileSizeMB = Math.round(fileSize / MB);
+      Helper.setContentLengthIfNotExist(info);
+      const selectedFormat = findDefaultFormat(info);// info.formats.find(x=>x.itag === defaultVideoFormat.itag) || info.formats[0];
       setState({
         fetchedInfo:info,
         title:info.videoDetails.title,
         thumbnailUrl:info.videoDetails.thumbnails[0].url,
         videoFormats:info.formats,
-        contentLength: Number(selectedFormat.contentLength),
         selectedVideoFormat:selectedFormat,
-        fileSizeMB:fileSizeMB,
         isFetching:false,
       })
       props.onFetchComplete?.(props.id);
@@ -155,7 +173,6 @@ export function SingleVideo(props:IProps){
     const formateText = getFormatTex(state.selectedVideoFormat);
     setState({
       inProgress:true,
-      contentLength:Number(state.selectedVideoFormat.contentLength),
       formateText
     });
     
@@ -173,7 +190,6 @@ export function SingleVideo(props:IProps){
   useEffect(()=>{
     downloadedSize[props.id]=0;
     if(!props.info) {
-      // setState({startDownload:true});
       startFetchInfo();
     }
     else showInfoFromProps();
@@ -201,6 +217,7 @@ export function SingleVideo(props:IProps){
     if(state.isFetching)return;
     startFetchInfo();
   }
+
   if(!props.info && !state.title) return <p>Fetching...</p>
     return(
       <Container className="border">
@@ -224,7 +241,7 @@ export function SingleVideo(props:IProps){
             </div>
           </Col>
           <Col xs={3} className="h-100">
-            {!!state.inProgress && <p className="mb-0">{( Math.round(downloadedSize[props.id]/MB))}MB of {state.fileSizeMB} MB</p>}
+            {!!state.inProgress && <p className="mb-0">{( Math.round(downloadedSize[props.id]/MB))}MB of {fileSizeMB} MB</p>}
             {!state.inProgress && !state.downloadComplete && <div>
               <Dropdown onToggle={(isOpen)=>hanldeFormateSelectionToogle(isOpen)}>
                 <Dropdown.Toggle className="bg-success" >

@@ -1,5 +1,5 @@
 import { videoInfo, videoFormat } from "ytdl-core";
-import { IStore } from "../store";
+import { IStore } from "../../store";
 import { Result } from "ytpl";
 
 export interface IDownload{
