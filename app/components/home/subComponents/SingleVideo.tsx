@@ -6,7 +6,7 @@ import { Main_Events, Renderer_Events } from "../../../constants/constants";
 import {FaFolderOpen} from "react-icons/fa"
 import { useMultiState } from "../../common/hooks";
 import { Item } from "ytpl";
-import { videoFormat, videoInfo } from "ytdl-core";
+import { filterFormats, videoFormat, videoInfo } from "ytdl-core";
 import { IoMdDownload } from "react-icons/io";
 import { Helper } from "../../../lib/helpers";
 
@@ -124,13 +124,27 @@ export function SingleVideo(props:IProps){
   }
   const handleFetchComplete=()=>{
     const findDefaultFormat=(info:IVideoInfo)=>{
-      let mp4formats = info.formats.filter(x=>x.mimeType?.startsWith("video/mp4") && !x.isContentLengthCalculated );
-      mp4formats.sort((a,b)=> a > b?1:-1);
-      return mp4formats.find(x=> x.qualityLabel >= '360p')!;
+      let filteredVideos:IVideoFormat[] = info.formats;
+      const mp4formats = info.formats.filter(x=> x.mimeType?.startsWith("video/mp4"));
+      if(mp4formats.length)
+        filteredVideos = mp4formats;
+      
+      const videosWithAccurateFileSize = filteredVideos.filter(x => !x.isContentLengthCalculated);
+      if(videosWithAccurateFileSize.length)
+          filteredVideos = videosWithAccurateFileSize;
+      
+      const videosWithAtLestMediumQuality = filteredVideos.filter(x=> x.qualityLabel >= '360p');
+      if(videosWithAtLestMediumQuality.length)
+        filteredVideos = videosWithAtLestMediumQuality;
+
+      filteredVideos.sort((a,b)=> a.qualityLabel > b.qualityLabel ?1:-1);
+      console.log("filteredVideos",filteredVideos);
+      return mp4formats[0];
     }
 
     ipcRenderer.on(Main_Events.HANDLE_SINGLE_VIDEO_FETCH_COMPLETE_+props.id,(_,info:IVideoInfo)=>{
       if(state.fetchedInfo) return;
+      info.formats = info.formats.filter(x=>x.hasAudio && x.hasVideo);
       Helper.setContentLengthIfNotExist(info);
       const selectedFormat = findDefaultFormat(info);// info.formats.find(x=>x.itag === defaultVideoFormat.itag) || info.formats[0];
       setState({
