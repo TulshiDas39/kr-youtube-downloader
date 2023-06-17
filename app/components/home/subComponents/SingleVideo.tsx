@@ -124,8 +124,9 @@ export function SingleVideo(props:IProps){
   }
   const handleFetchComplete=()=>{
     const findDefaultFormat=(info:IVideoInfo)=>{
-      let filteredVideos:IVideoFormat[] = info.formats;
-      const mp4formats = info.formats.filter(x=> x.mimeType?.startsWith("video/mp4"));
+      let filteredVideos:IVideoFormat[] = info.formats.slice();
+      const mp4formats = info.formats.filter(x=> x.mimeType?.startsWith("video/mp4") && x.hasVideo);
+
       if(mp4formats.length)
         filteredVideos = mp4formats;
       
@@ -138,13 +139,14 @@ export function SingleVideo(props:IProps){
         filteredVideos = videosWithAtLestMediumQuality;
 
       filteredVideos.sort((a,b)=> a.qualityLabel > b.qualityLabel ?1:-1);
-      console.log("filteredVideos",filteredVideos);
-      return mp4formats[0];
+      return filteredVideos[0];
     }
 
     ipcRenderer.on(Main_Events.HANDLE_SINGLE_VIDEO_FETCH_COMPLETE_+props.id,(_,info:IVideoInfo)=>{
       if(state.fetchedInfo) return;
-      info.formats = info.formats.filter(x=>x.hasAudio && x.hasVideo);
+      info.formats = info.formats.filter(x=>x.hasAudio);
+      if(!info.formats.length) 
+        return ;
       Helper.setContentLengthIfNotExist(info);
       const selectedFormat = findDefaultFormat(info);// info.formats.find(x=>x.itag === defaultVideoFormat.itag) || info.formats[0];
       setState({

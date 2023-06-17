@@ -13,7 +13,7 @@ export class Helper{
   static setContentLengthIfNotExist(info:IVideoInfo){
     const formatsWithNoContentSize = info.formats.filter(x=> !x.contentLength || isNaN(x.contentLength as any));
     for(let format of formatsWithNoContentSize){
-      const bitrate = format.averageBitrate || format.bitrate!;
+      const bitrate = 30000;//format.averageBitrate || format.bitrate!;
       format.contentLength = (bitrate * +info.videoDetails.lengthSeconds)+"";
       format.isContentLengthCalculated = true;
     }
