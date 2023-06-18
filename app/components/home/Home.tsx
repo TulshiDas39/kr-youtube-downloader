@@ -50,11 +50,11 @@ export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
   handleSubmit= async(e:FormEvent<HTMLElement>)=>{
     e.preventDefault();
     let id:string;
-    let errorMsg = "Do you want to remove existing item";
+    let errorMsg = "Do you want to remove existing item?";
     if(ytdl.validateURL(this.state.url)){
       id = ytdl.getVideoID(this.state.url);
       if(this.props.downloadIds.includes(id)){
-        ModalData.ConfirmationModal.title=errorMsg;
+        ModalData.ConfirmationModal.description=errorMsg;
         ModalData.ConfirmationModal.onConfirm=()=>this.props.dispatch(ActionHome.removeDownload(id));
         this.props.dispatch(ActionModal.openModal(ModalName.CONFIRMATION_MODAL))
       }
