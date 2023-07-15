@@ -1,7 +1,7 @@
 {
   "name": "kr-youtube-downloader",
   "productName": "YoutubeDownloader",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Youtube downloader",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
@@ -99,7 +99,8 @@
       "owner": "TulshiDas39",
       "repo": "kr-youtube-downloader",
       "private": false
-    }
+    },
+    "artifactName": "Git-Studio-Setup-${os}-${arch}-${version}.${ext}"
   },
   "repository": {
     "type": "git",

@@ -2,6 +2,7 @@ import fs from "fs"
 import { ipcMain, shell } from "electron";
 import { Renderer_Events } from "../constants/constants";
 import { ConstantMain } from "../constants/constantMain";
+import { join } from "path";
 export class FileManager{
 
   constructor(){
@@ -29,6 +30,16 @@ export class FileManager{
     if(!fs.existsSync(path)) fs.mkdir(path,(err=>{
       console.error(err);
     }));
+  }
+
+  static createDirIfNotExistSync(path:string){
+    if(!fs.existsSync(path)) fs.mkdirSync(path);
+  }
+
+  static createPlaylistFolderIfDoesnotExist(foldername:string){
+    this.checkForWorksPace();
+    const playlistPath = join(ConstantMain.worksPaceDir,foldername);
+    this.createDirIfNotExistSync(playlistPath);
   }
 
 }

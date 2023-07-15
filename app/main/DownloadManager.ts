@@ -45,8 +45,16 @@ export class DownloadManager{
       const downloadStartedData:ISingleVideoDownloadStarted={
         downloadPath: download_path,
       }
+      
       let downloadStartedChannel = Main_Events.HANDLE_SINGLE_VIDEO_DOWNLOAD_STARTED_+data.info.videoDetails.videoId;
-      if(data.playlistId)downloadStartedChannel+=data.playlistId;
+      if(data.playlistId){
+        downloadStartedChannel+=data.playlistId;        
+        const playlistFolder = path.basename(data.downloadPath!);
+        FileManager.createPlaylistFolderIfDoesnotExist(playlistFolder);
+      }
+      else
+        FileManager.checkForWorksPace();
+      
       mainWindow?.webContents.send(downloadStartedChannel,downloadStartedData);
       this.downloadVideoFromInfo(data.info,data.selectedVideoFormat,download_path,data.playlistId);
     })
@@ -103,7 +111,7 @@ export class DownloadManager{
     ytpl(id).then(result=>{
       const folderName = result.title.replace(this.charactersToAvoidInFileName,"_");
       const downloadPath = path.join(ConstantMain.worksPaceDir,folderName);
-      FileManager.createDirIfNotExist(downloadPath);
+      //FileManager.createPlaylistFolderIfDoesnotExist(folderName);
       let data:IPlaylistFetchComplete={
         result: result,
         downloadPath:downloadPath,

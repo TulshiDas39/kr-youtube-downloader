@@ -64,7 +64,7 @@ export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
     else if(ytpl.validateID(this.state.url)){
       id = await ytpl.getPlaylistID(this.state.url);
       if(this.props.downloadIds.includes(id)){
-        ModalData.ConfirmationModal.title=errorMsg;
+        ModalData.ConfirmationModal.description=errorMsg;
         ModalData.ConfirmationModal.onConfirm=()=>this.props.dispatch(ActionHome.removeDownload(id));
         this.props.dispatch(ActionModal.openModal(ModalName.CONFIRMATION_MODAL))
       }
