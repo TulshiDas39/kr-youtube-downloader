@@ -1,4 +1,0 @@
-export enum ModalName{
-    CONFIRMATION_MODAL="OPTION_MODAL",
-    ALERT_MODAL="ALERT_MODAL"
-}
