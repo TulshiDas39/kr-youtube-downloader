@@ -1,7 +1,7 @@
 import React from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { IPlaylistDownloadState } from "../states";
-import { FaAngleDown, FaAngleUp, FaSortAmountDown } from "react-icons/fa";
+import { FaAngleDown, FaAngleUp, FaDownload, FaSortAmountDown } from "react-icons/fa";
 import { ipcRenderer } from "electron";
 import { Renderer_Events, Main_Events } from "../../../constants/constants";
 import { SingleVideo } from "./SingleVideo";
@@ -49,24 +49,26 @@ export class PlaylistDownload extends React.PureComponent<IPlaylistDownloadProps
               </div>
             </Col>
             <Col xs={3} style={{maxHeight:this.maxHeight}}>
-              <div className="d-flex">
-                <div style={{flexGrow:7}}>
-                  <p className="mb-0">{this.state.completedIds.length} of {this.state.info.items.length}</p>
-                  {this.state.completedIds.length !== this.state.info.items.length &&
-                  <Button className="ml-1" type="button" title="Start download" disabled={!this.state.selectedVideoIds.length} onClick={this.startDownload}><FaSortAmountDown /></Button>}
-                </div>
-                <div className="d-flex align-items-center justify-content-center" style={{flexGrow:3}}>
-                  <span className="rounded-circle p-1 hover-circle cursor-pointer" onClick={this.handleExpansion}>
-                    {
-                      this.state.expanded? <FaAngleUp />:<FaAngleDown />
-                    }
+              <Row>
+                <Col xs={2}></Col>
+                <Col xs={8}>
+                  <div style={{flexGrow:7}}>
+                    <p className="mb-0">{this.state.completedIds.length} of {this.state.info.items.length}</p>
+                    {this.state.completedIds.length !== this.state.info.items.length &&
+                    <Button className="ml-1" type="button" title="Start download" disabled={!this.state.selectedVideoIds.length} onClick={this.startDownload}><FaDownload /></Button>}
+                  </div>                  
+                </Col>
+                <Col xs={2} className="d-flex align-items-center">
+                  <span className="cursor-pointer" onClick={this.handleExpansion} title={this.state.expanded?"Collapse list":"Expande list"}>
+                        {
+                          this.state.expanded? <FaAngleUp />:<FaAngleDown />
+                        }
                   </span>                  
-                </div>
-              </div>
-
+                </Col>                
+              </Row>          
             </Col>
           </Row>
-          <div className={`row ${this.state.expanded?'':'d-none'}`} style={{border:'5px solid green'}}>
+          <div className={`row ${this.state.expanded?'':'d-none'}`} style={{borderTop:'5px solid green'}}>
                 {
                   this.state.info.items.map(v=>(
                     <SingleVideo key={v.id} onComplete={()=>this.handleSingleVideoDownloadComplete(v)} id={v.id} playlistId={this.props.id}

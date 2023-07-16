@@ -13,6 +13,7 @@ import ytpl from "ytpl";
 import { ModalData } from "../common/Modals/ModalData";
 import { ModalName } from "../../constants/constUi";
 import './home.css';
+import { FaAngleDoubleDown, FaChevronDown } from "react-icons/fa";
 
 export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
   state:IHomeState = {
@@ -31,7 +32,7 @@ export class HomeComponent extends React.PureComponent<IHomeProps,IHomeState>{
               {/* <Button className="ml-1" type="submit"><IoMdDownload /></Button> */}
               {
                 this.props.inFetch.length ? <GiEuropeanFlag className="icon-spin h1"/>:
-                <Button className="ml-1" title="Fetch" type="submit"><AiOutlinePlus /></Button>
+                <Button className="ml-1" title="Fetch" type="submit"><FaAngleDoubleDown /></Button>
               }
             </div>
           </Form.Group>
