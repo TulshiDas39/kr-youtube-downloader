@@ -12,6 +12,7 @@ import { ConfigInfo } from "./dataClasses";
 import { AppData } from "./dataClasses/AppData";
 import { SavedData } from "./dataClasses/SavedData";
 import { DB } from "./db_service/db_service";
+import { Settings } from "./settings";
 
 export class Startup{
     private uiPort = 54523;
@@ -25,7 +26,7 @@ export class Startup{
     }
 
     checkForUpdate(){
-      if(process.env.NODE_ENV === 'development')
+      if(Settings.ENV === 'DEVELOPMENT')
         return;
         new Updater().checkForUpdate();
 
@@ -51,9 +52,6 @@ export class Startup{
           
     }
 
-    private initAppData(){
-        // AppData.appPath = app.getAppPath();
-    }
 
     private async loadSavedData(){
         SavedData.recentRepositories = DB.repository.getAll();        
@@ -68,9 +66,6 @@ export class Startup{
     }
 
     private async setAvailablePort(){        
-        console.log("process.NODE_ENV",(process as any).NODE_ENV)
-        console.log("process.FRONTEND_PORT",(process as any).FRONTEND_PORT)
-        console.log("process.env.FRONTEND_PORT",process.env.FRONTEND_PORT)
         
         let portNumber = SavedData.configInfo.portNumber || 54523;
         try{          
@@ -89,13 +84,12 @@ export class Startup{
     }
 
     private async hostFrontend(){
-      if(process.env.NODE_ENV === 'development'){
-        this.uiPort = process.env.FRONTEND_PORT;
+      if(Settings.ENV === 'DEVELOPMENT'){
+        this.uiPort = Settings.FRONTEND_PORT;
         return;
       }
       await this.setAvailablePort();
       
-      //const port = process.env.PORT || 8080;
       const app = express();
 
       // serve static assets normally
@@ -113,7 +107,7 @@ export class Startup{
     }
 
     private async  createWindow() {
-        if(process.env.NODE_ENV !== 'development')
+        if(Settings.ENV !== 'DEVELOPMENT')
           Menu.setApplicationMenu(null);
         const mainWindow = new BrowserWindow({
           height: 600,
@@ -127,7 +121,7 @@ export class Startup{
         AppData.mainWindow = mainWindow;
         mainWindow.loadURL(`http://localhost:${this.uiPort}`);
         
-        if(process.env.NODE_ENV === 'development')
+        if(Settings.ENV === 'DEVELOPMENT')
           mainWindow.webContents.openDevTools();
     }
 
