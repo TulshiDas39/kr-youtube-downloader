@@ -119,6 +119,7 @@ export class Startup{
         });
         mainWindow.maximize();
         AppData.mainWindow = mainWindow;
+        console.log("Loading ui app in port:"+this.uiPort);
         mainWindow.loadURL(`http://localhost:${this.uiPort}`);
         
         if(Settings.ENV === 'DEVELOPMENT')
