@@ -41,7 +41,6 @@ export class FileManager{
             });
 
         });
-        
     }
 
     private handleOpenFileExplorer(){

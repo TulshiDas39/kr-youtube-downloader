@@ -1,10 +1,13 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import {EqualityFn, useSelector} from 'react-redux';
-import { ReducerSavedData } from './slices';
+import {EqualityFn, useDispatch, useSelector} from 'react-redux';
+import { HomeReducer, ReducerSavedData } from './slices';
 import { ReducerUI } from './slices/UiSlice';
+import { ModalReducer } from './slices/modalSlice';
 const AppReducer = combineReducers({
     savedData:ReducerSavedData,
     ui:ReducerUI,
+    home:HomeReducer,
+    modals:ModalReducer,
 });
 
 const AppResetActionType = 'app/Reset';

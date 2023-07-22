@@ -20,78 +20,6 @@ export class RendererEvents{
         return result;
     }
 
-    static getRepositoryDetails(){
-        const channel = "getRepositoryDetails";
-        const result:IChannelModel={
-            channel,
-            replyChannel: RendererEvents.replyChanelPrefix+channel
-        }
-        return result;
-    };
-
-    static getStatus(){
-        const channel = "getStatus";
-        const result:IChannelModel={
-            channel,
-            replyChannel: RendererEvents.replyChanelPrefix+channel
-        }
-        return result;
-    };
-
-    static stageItem(){
-        const channel = "stageItem";
-        const result:IChannelModel={
-            channel,
-            replyChannel: RendererEvents.replyChanelPrefix+channel
-        }
-        return result;
-    };
-
-    static unStageItem(){
-        const channel = "unStageItem";
-        const result:IChannelModel={
-            channel,
-            replyChannel: RendererEvents.replyChanelPrefix+channel
-        }
-        return result;
-    };
-
-    static stageAll(){
-        const channel = "stageAll";
-        const result:IChannelModel={
-            channel,
-            replyChannel: RendererEvents.replyChanelPrefix+channel
-        }
-        return result;
-    };
-
-    static unStageAll(){
-        const channel = "unStageAll";
-        const result:IChannelModel={
-            channel,
-            replyChannel: RendererEvents.replyChanelPrefix+channel
-        }
-        return result;
-    };
-    
-    static discardItem(){
-        const channel = "discardItem";
-        const result:IChannelModel={
-            channel,
-            replyChannel: RendererEvents.replyChanelPrefix+channel
-        }
-        return result;
-    };
-
-    static discardAll(){
-        const channel = "discardAll";
-        const result:IChannelModel={
-            channel,
-            replyChannel: RendererEvents.replyChanelPrefix+channel
-        }
-        return result;
-    };
-
     static getFileContent(){
         const channel = "getFileContent";
         const result:IChannelModel={
@@ -99,14 +27,52 @@ export class RendererEvents{
             replyChannel: RendererEvents.replyChanelPrefix+channel
         }
         return result;
-    };
+    }
 
-    static diff(){
-        const channel = "diff";
-        return {
+    static isValidVedioUrl(){
+        const channel = "isValidVedioUrl";
+        const result:IChannelModel={
             channel,
             replyChannel: RendererEvents.replyChanelPrefix+channel
-        } as IChannelModel;        
+        }
+        return result;
     }
+
+    static isValidVedioId(){
+        const channel = "isValidVedioId";
+        const result:IChannelModel={
+            channel,
+            replyChannel: RendererEvents.replyChanelPrefix+channel
+        }
+        return result;
+    }
+
+    static isValidPlaylistUrl(){
+        const channel = "isValidPlaylistUrl";
+        const result:IChannelModel={
+            channel,
+            replyChannel: RendererEvents.replyChanelPrefix+channel
+        }
+        return result;
+    }
+
+    static getVideoID(){
+        const channel = "getVideoID";
+        const result:IChannelModel={
+            channel,
+            replyChannel: RendererEvents.replyChanelPrefix+channel
+        }
+        return result;
+    }
+
+    static getPlaylistID(){
+        const channel = "getPlaylistID";
+        const result:IChannelModel={
+            channel,
+            replyChannel: RendererEvents.replyChanelPrefix+channel
+        }
+        return result;
+    }
+    
 }
-5800319
+

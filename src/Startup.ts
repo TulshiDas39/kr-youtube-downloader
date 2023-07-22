@@ -1,18 +1,17 @@
 import { MainEvents } from "common_library";
 import { app, BrowserWindow, Menu } from "electron";
-import { autoUpdater } from "electron-updater";
 import express = require("express");
 import getPort = require("get-port");
 import * as path from "path";
 import { DataManager } from "./businessClasses";
 import { FileManager } from "./businessClasses/FileManager";
-import { GitManager } from "./businessClasses/GitManager";
 import { Updater } from "./businessClasses/Updater";
 import { ConfigInfo } from "./dataClasses";
 import { AppData } from "./dataClasses/AppData";
 import { SavedData } from "./dataClasses/SavedData";
 import { DB } from "./db_service/db_service";
 import { Settings } from "./settings";
+import { DownloadManager } from "./businessClasses/DownloadManager";
 
 export class Startup{
     private uiPort = 54523;
@@ -157,7 +156,7 @@ export class Startup{
 
     private startIpcManagers(){
       new DataManager().start();
-      new GitManager().start();
+      new DownloadManager().start();
       new FileManager().start();
     }
 

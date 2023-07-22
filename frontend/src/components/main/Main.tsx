@@ -6,6 +6,7 @@ import { useMultiState } from "../../lib";
 import { useSelectorTyped } from "../../store/rootReducer";
 import { ActionSavedData } from "../../store/slices";
 import { ActionUI, EnumHomePageTab } from "../../store/slices/UiSlice";
+import { Home } from "../home/Home";
 
 
 interface IState{
@@ -29,7 +30,7 @@ function MainComponent(){
     },[]);
     if(state.isLoading) return null;
     return <div className="h-100">
-        <div>Main page</div>
+        <Home />
     </div>
 }
 
