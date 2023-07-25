@@ -1,9 +1,8 @@
 import { Item, Result } from "ytpl";
-import { IPlaylistFetchComplete, useMultiState } from "../../../lib";
+import { IPlaylistFetchComplete, IpcUtils, useMultiState } from "../../../lib";
 import { Main_Events, Renderer_Events } from "../../../lib/constants";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp, FaDownload } from "react-icons/fa";
-import { ipcRenderer } from "electron";
 import { useEffect } from "react";
 import { SingleVideo } from "./SingleVideo";
 import React from "react";
@@ -99,17 +98,13 @@ function PlaylistDownloadComponent(props:IPlaylistDownloadProps){
       }    
     
       const fetchPlaylistInfo=()=>{
-        ipcRenderer.send(Renderer_Events.FETCH_PLAYLIST_INFO ,props.id);
-      }
-    
-      const handlePlaylistFetchComplete=()=>{
-        ipcRenderer.on(Main_Events.HANDLE_PLAYLIST_FETCH_COMPLETE_+props.id,(_e, data: IPlaylistFetchComplete)=>{      
+        IpcUtils.fetchPlaylistInfo(props.id).then(data=>{
           setState({
             info:data.result,donloadPath:data.downloadPath,
             fetchingItem:data.result.items[0]
           });
-        })
-      }
+        });        
+      }         
 
       useEffect(()=>{
         if(state.info)
@@ -127,7 +122,6 @@ function PlaylistDownloadComponent(props:IPlaylistDownloadProps){
 
     useEffect(()=>{
         fetchPlaylistInfo();        
-        handlePlaylistFetchComplete();
     },[])
 
     if(!state.info) return <p>Fetching info...</p>

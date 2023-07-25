@@ -72,7 +72,26 @@ export class RendererEvents{
             replyChannel: RendererEvents.replyChanelPrefix+channel
         }
         return result;
+    }    
+
+    static fetchPlaylistInfo(){
+        const channel = "fetchPlaylistInfo";
+        const result:IChannelModel={
+            channel,
+            replyChannel: RendererEvents.replyChanelPrefix+channel
+        }
+        return result;
+    }
+
+    static handlePlaylistFetchComplete(){
+        const channel = "handlePlaylistFetchComplete";
+        const result:IChannelModel={
+            channel,
+            replyChannel: RendererEvents.replyChanelPrefix+channel
+        }
+        return result;
     }
     
+    //HANDLE_PLAYLIST_FETCH_COMPLETE_
 }
 

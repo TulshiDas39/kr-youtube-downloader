@@ -1,5 +1,6 @@
 import { RendererEvents } from "common_library";
 import { ipcRenderer } from "electron";
+import { IPlaylistFetchComplete } from "./interfaces";
 
 export class IpcUtils{
     static isValidVideoUrl(url:string){
@@ -20,5 +21,15 @@ export class IpcUtils{
 
     static getPlaylistId(url:string){
         return ipcRenderer.sendSync(RendererEvents.getPlaylistID().channel,url) as string;
+    }
+
+    static fetchPlaylistInfo(playlistId:string){
+        return new Promise<IPlaylistFetchComplete>((res)=>{
+            ipcRenderer.on(RendererEvents.handlePlaylistFetchComplete().channel+playlistId,(_e, data: IPlaylistFetchComplete)=>{
+                ipcRenderer.removeAllListeners(RendererEvents.handlePlaylistFetchComplete().channel+playlistId);
+                res(data);
+            })
+            ipcRenderer.send(RendererEvents.fetchPlaylistInfo().channel ,playlistId);
+        });
     }
 }
