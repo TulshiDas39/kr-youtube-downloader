@@ -1,10 +1,19 @@
-import { RendererEvents } from "common_library";
+import { Constants, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted, IVideoFormat, IVideoInfo, RendererEvents } from "common_library";
 import { ipcMain } from "electron";
 import * as ytdl from "ytdl-core";
 import * as ytpl from "ytpl";
+import { FileManager } from "./FileManager";
+import * as path from "path";
+import { ConstantMain } from "../dataClasses";
+import * as fs from 'fs';
 
 export class DownloadManager{
+
+    readonly charactersToAvoidInFileName = /[#%&{}\\<>*?\/\s$!'":@+`|=]/g
+    readonly workspacePath = ConstantMain.worksPaceDir;
+    
     start(){
+        new FileManager();
         this.addIpcHandlers();
     }
 
@@ -14,6 +23,8 @@ export class DownloadManager{
         this.addVideoIdExtractor();
         this.addPlaylistIdExtractor();
         this.addVideoIdValidator();
+        this.handleSingleVideoInfoFetch();
+        this.handleSingleVideoDownloadFromInfo();
     }
 
     private addSingleVideoUrlValidator(){
@@ -44,4 +55,72 @@ export class DownloadManager{
             e.returnValue = ytdl.validateID(videoId);
         })
     }
+
+    handleSingleVideoInfoFetch=()=>{
+        ipcMain.on(RendererEvents.fetchVideoInfo().channel, (_event,id:string) => {
+    
+          ytdl.getInfo(Constants.URL_PREFIX+id).then(data=>{            
+            _event.returnValue = data;
+          });
+        })
+    }
+
+    handleSingleVideoDownloadFromInfo(){
+        ipcMain.on(RendererEvents.startVideoDownload().channel, (e,data:ISingleVideoDownloadFromInfo) => {
+          let fileName = data.info.videoDetails.title.toString()?.replace(this.charactersToAvoidInFileName,"_");
+          fileName += `.${data.selectedVideoFormat.container}`
+          const download_path  = path.join((data.downloadPath || this.workspacePath),fileName);
+          const downloadStartedData:ISingleVideoDownloadStarted={
+            downloadPath: download_path,
+          }
+          
+        //   let downloadStartedChannel = Main_Events.HANDLE_SINGLE_VIDEO_DOWNLOAD_STARTED_+data.info.videoDetails.videoId;
+          if(data.playlistId){
+            // downloadStartedChannel+=data.playlistId;        
+            const playlistFolder = path.basename(data.downloadPath!);
+            FileManager.createPlaylistFolderIfDoesnotExist(playlistFolder);
+          }
+          else
+            FileManager.checkForWorksPace();
+          e.returnValue = downloadStartedData;
+        //   mainWindow?.webContents.send(downloadStartedChannel,downloadStartedData);
+          this.downloadVideoFromInfo(data.info,data.selectedVideoFormat,download_path,data.playlistId);
+        })
+    }
+
+    downloadVideoFromInfo(info:IVideoInfo ,formate:IVideoFormat,downloadPath:string,playlistId?:string){
+        // const formate = info.formats.find(x=>x.itag === this.formate);
+        const video = ytdl.downloadFromInfo(info as ytdl.videoInfo,{quality:formate.itag});
+        // let fileName = info.videoDetails.title.toString()?.replace(this.charactersToAvoidInFileName,"_");
+        // fileName += `.${formate?.container || "mp4"}`
+        // const download_path  = path.join(this.workspacePath,fileName);
+        // const singleVideo:ISingleVideo = {
+        //   info:info,
+        //   format:formate!,
+        //   downloadPath:downloadPath
+        // }
+        //if(!playlistId) mainWindow?.webContents.send(Main_Events.ADD_SINGLE_DOWNLOAD_ITEM,singleVideo);
+        video.pipe(fs.createWriteStream(downloadPath));
+        video.on('data',(chunk)=>{
+        })
+        let progressChannel = Main_Events.HANDLE_PROGRESS_+info.videoDetails.videoId;
+        if(playlistId) progressChannel+=playlistId;
+        video.on('progress',(chunkSize:number)=>{
+          let progress:IProgress={
+            chunkSize:chunkSize,
+            singleVideoId:info.videoDetails.videoId
+          }
+          mainWindow?.webContents.send(progressChannel,progress);
+        })
+        let completeChannel = Main_Events.HANDLE_COMPLETE_+info.videoDetails.videoId;
+        if(playlistId)completeChannel+=playlistId;
+        video.on('end',()=>{
+          let progress:IProgress={
+            chunkSize:0,
+            singleVideoId:info.videoDetails.videoId
+          }
+          mainWindow?.webContents.send(completeChannel,progress);
+        })
+    
+      }
 }

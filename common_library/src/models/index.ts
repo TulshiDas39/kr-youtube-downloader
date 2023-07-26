@@ -8,3 +8,8 @@ export * from './IBranchRemote';
 export * from './IMergeLine';
 export * from './IFile';
 export * from './IStatus';
+export * from './ISingleVideoDownloadFromInfo';
+export * from './IVideoInfo';
+export * from './IVideoFormat';
+export * from './ISingleVideoDownloadStarted';
+export * from './IVideoDetails';

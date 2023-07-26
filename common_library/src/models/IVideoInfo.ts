@@ -1,7 +1,7 @@
-import { videoInfo } from "ytdl-core";
+import { IVideoDetails } from "./IVideoDetails";
 import { IVideoFormat } from "./IVideoFormat";
 
 export interface IVideoInfo{
-    videoDetails: any;
+    videoDetails: IVideoDetails;
     formats:IVideoFormat[];
 }

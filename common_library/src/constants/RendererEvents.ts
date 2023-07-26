@@ -91,7 +91,61 @@ export class RendererEvents{
         }
         return result;
     }
+
+    static openFolder(){
+        const channel = arguments.callee.name;
+        const result:IChannelModel={
+            channel,
+            replyChannel: RendererEvents.replyChanelPrefix+channel
+        }
+        return result;
+    }
+
+    static handleDownloadProgress(){
+        const channel = arguments.callee.name;
+        const result:IChannelModel={
+            channel,
+            replyChannel: RendererEvents.replyChanelPrefix+channel
+        }
+        return result;
+    }
+
+
+    static handleDownloadComplete(){
+        const channel = arguments.callee.name;
+        const result:IChannelModel={
+            channel,
+            replyChannel: RendererEvents.replyChanelPrefix+channel
+        }
+        return result;
+    }
+
+    static fetchVideoInfo(){
+        const channel = arguments.callee.name;
+        const result:IChannelModel={
+            channel,
+            replyChannel: RendererEvents.replyChanelPrefix+channel
+        }
+        return result;
+    }
+
+    static videoFetchComplete(){
+        const channel = arguments.callee.name;
+        const result:IChannelModel={
+            channel,
+            replyChannel: RendererEvents.replyChanelPrefix+channel
+        }
+        return result;
+    }
+
+    static startVideoDownload(){
+        const channel = arguments.callee.name;
+        const result:IChannelModel={
+            channel,
+            replyChannel: RendererEvents.replyChanelPrefix+channel
+        }
+        return result;
+    }
     
-    //HANDLE_PLAYLIST_FETCH_COMPLETE_
 }
 

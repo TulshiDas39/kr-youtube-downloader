@@ -3,49 +3,41 @@ import { dialog, ipcMain, shell } from "electron";
 import * as fs from 'fs';
 
 export class FileManager{
-    start(){
-        this.addIpcHandlers();
-    }
+    constructor(){
+        this.init();
+      }
+      init(){
+        this.setIpcEvents();
+      }
+      setIpcEvents(){
+        this.handleFolderOpen();
+      }
 
-    addIpcHandlers(){
-        this.handleGetDirectoryPath();
-        this.handleOpenFileExplorer();
-        this.handleGetFileContent();
-    }
-    handleGetFileContent() {
-        ipcMain.on(RendererEvents.getFileContent().channel,async (e,path:string)=>{
-            const lines = await this.getFileContent(path);
-            e.reply(RendererEvents.getFileContent().replyChannel,lines);
-        });
-    }
+    handleFolderOpen(){
+        ipcMain.on(Renderer_Events.OPEN_FOLDER,(e,path:string)=>{
+          shell.showItemInFolder(path);
+        })
+      }
+      createFileIfNotExist(path:string){
+        if(!fs.existsSync(path)) fs.writeFileSync(path,"");
+      }
     
-    getFileContent(path: string) {
-        return new Promise<string[]>((resolve,reject)=>{
-            fs.readFile(path,{encoding:"utf8"},(err,data)=>{
-                if(data){
-                    const lines = data.split(/\r\n|\r|\n/g);
-                    resolve(lines);
-                }
-                else if(err) reject(err);
-            })
-        })
-    }
-
-    handleGetDirectoryPath(){
-        ipcMain.on(RendererEvents.getDirectoryPath().channel,(e)=>{
-            dialog.showOpenDialog({
-                properties: ['openDirectory']
-            }).then(res=>{
-                res.filePaths[0];
-                e.reply(RendererEvents.getDirectoryPath().replyChannel,res.filePaths[0]);
-            });
-
-        });
-    }
-
-    private handleOpenFileExplorer(){
-        ipcMain.on(RendererEvents.openFileExplorer,(e,path:string)=>{
-            shell.showItemInFolder(path);
-        })
-    }
+      static checkForWorksPace(){
+        if(!fs.existsSync(ConstantMain.worksPaceDir)) fs.mkdirSync(ConstantMain.worksPaceDir);
+      }
+      static createDirIfNotExist(path:string){
+        if(!fs.existsSync(path)) fs.mkdir(path,(err=>{
+          console.error(err);
+        }));
+      }
+    
+      static createDirIfNotExistSync(path:string){
+        if(!fs.existsSync(path)) fs.mkdirSync(path);
+      }
+    
+      static createPlaylistFolderIfDoesnotExist(foldername:string){
+        this.checkForWorksPace();
+        const playlistPath = join(ConstantMain.worksPaceDir,foldername);
+        this.createDirIfNotExistSync(playlistPath);
+      }
 }

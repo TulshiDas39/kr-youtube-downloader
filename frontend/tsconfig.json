@@ -21,6 +21,6 @@
     "jsx": "react-jsx"
   },
   "include": [
-    "src",
+    "src", "../common_library/src/models/IVideoFormat.ts",
   ] 
 }

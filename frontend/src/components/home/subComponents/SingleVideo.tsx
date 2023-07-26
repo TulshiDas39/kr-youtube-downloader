@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef } from "react";
 import { Container, Row, Col, Image, ProgressBar, Dropdown, Button, } from "react-bootstrap";
-import { ipcRenderer } from "electron";
 import {FaFolderOpen} from "react-icons/fa"
 import { Item } from "ytpl";
-// import { videoFormat } from "ytdl-core";
 import { IoMdDownload } from "react-icons/io";
-import { Helper, IProgress, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted, IVideoFormat, IVideoInfo, useMultiState } from "../../../lib";
+import { Helper, IpcUtils, useMultiState } from "../../../lib";
 import { Main_Events, Renderer_Events } from "../../../lib/constants";
+import { ISingleVideoDownloadFromInfo, RendererEvents } from "common_library";
 
 const imgSrc = "https://cloudfour.com/examples/img-currentsrc/images/kitten-large.png";
 const downloadedSize:{[name:string]:number}={};
@@ -85,28 +84,29 @@ export function SingleVideo(props:IProps){
   },[fileSizeMB])
 
   const handleFolderClick=()=>{
-    ipcRenderer.send(Renderer_Events.OPEN_FOLDER,state.downloadPath);
+    IpcUtils.openFolder(state.downloadPath);    
   }
 
   const handleProgress=()=>{
     let progressChannel = Main_Events.HANDLE_PROGRESS_+props.id;
     if(props.playlistId) progressChannel+=props.playlistId;
-    ipcRenderer.on(progressChannel,(_,progress:IProgress)=>{
+    IpcUtils.handleDownloadProgress(progressChannel,(progress)=>{
       downloadedSize[props.id]+=progress.chunkSize;
       if(downloadedSize[props.id]> dataRef.current.contentLength)downloadedSize[props.id]=dataRef.current.contentLength;
       let percent = Math.round((downloadedSize[props.id]/dataRef.current.contentLength)*100);
       if(percent > 100) percent = 100;
       if(state.progressPercent < percent) setState({progressPercent:percent});
-    })
+    });    
   }
 
   const handleComplete=()=>{
-    let completeChannel = Main_Events.HANDLE_COMPLETE_+props.id;
-    if(props.playlistId)completeChannel+=props.playlistId;
-    ipcRenderer.on(completeChannel,()=>{
-        setState({downloadComplete:true,inProgress:false,progressPercent:100});
-        props.onComplete?.(props.id);      
-    })
+    let id = props.id;
+    if(props.playlistId)id += props.playlistId;
+
+    IpcUtils.handleDownloadComplete(id,()=>{
+      setState({downloadComplete:true,inProgress:false,progressPercent:100});
+      props.onComplete?.(props.id);
+    });
   }
 
   const showInfoFromProps=()=>{
@@ -118,44 +118,6 @@ export function SingleVideo(props:IProps){
       title:props.info.title,
       thumbnailUrl:props.info.thumbnails[0].url!,
       selectedVideoFormat:defaultVideoFormat,
-    })
-  }
-  const handleFetchComplete=()=>{
-    const findDefaultFormat=(info:IVideoInfo)=>{
-      let filteredVideos:IVideoFormat[] = info.formats.slice();
-      const mp4formats = info.formats.filter(x=> x.mimeType?.startsWith("video/mp4") && x.hasVideo);
-
-      if(mp4formats.length)
-        filteredVideos = mp4formats;
-      
-      const videosWithAccurateFileSize = filteredVideos.filter(x => !x.isContentLengthCalculated);
-      if(videosWithAccurateFileSize.length)
-          filteredVideos = videosWithAccurateFileSize;
-      
-      const videosWithAtLestMediumQuality = filteredVideos.filter(x=> x.qualityLabel >= '360p');
-      if(videosWithAtLestMediumQuality.length)
-        filteredVideos = videosWithAtLestMediumQuality;
-
-      filteredVideos.sort((a,b)=> a.qualityLabel > b.qualityLabel ?1:-1);
-      return filteredVideos[0];
-    }
-
-    ipcRenderer.on(Main_Events.HANDLE_SINGLE_VIDEO_FETCH_COMPLETE_+props.id,(_,info:IVideoInfo)=>{
-      if(state.fetchedInfo) return;
-      info.formats = info.formats.filter(x=>x.hasAudio);
-      if(!info.formats.length) 
-        return ;
-      Helper.setContentLengthIfNotExist(info);
-      const selectedFormat = findDefaultFormat(info);// info.formats.find(x=>x.itag === defaultVideoFormat.itag) || info.formats[0];
-      setState({
-        fetchedInfo:info,
-        title:info.videoDetails.title,
-        thumbnailUrl:info.videoDetails.thumbnails[0].url,
-        videoFormats:info.formats,
-        selectedVideoFormat:selectedFormat,
-        isFetching:false,
-      })
-      props.onFetchComplete?.(props.id);
     })
   }
 
@@ -193,13 +155,50 @@ export function SingleVideo(props:IProps){
     handleDownloadStarted();
     handleProgress();
     handleComplete();
-    ipcRenderer.send(Renderer_Events.DOWNLOAD_SINGLE_VIDEO_FROM_INFO,data);
+    ipcRenderer.send(RendererEvents.startVideoDownload().channel,data);
   }
   const startFetchInfo=()=>{
     if(state.isFetching) return;
+    
     ipcRenderer.send(Renderer_Events.FETCH_SINGLE_VIDEO_INFO, props.id);
+    const findDefaultFormat=(info:IVideoInfo)=>{
+      let filteredVideos:IVideoFormat[] = info.formats.slice();
+      const mp4formats = info.formats.filter(x=> x.mimeType?.startsWith("video/mp4") && x.hasVideo);
+
+      if(mp4formats.length)
+        filteredVideos = mp4formats;
+      
+      const videosWithAccurateFileSize = filteredVideos.filter(x => !x.isContentLengthCalculated);
+      if(videosWithAccurateFileSize.length)
+          filteredVideos = videosWithAccurateFileSize;
+      
+      const videosWithAtLestMediumQuality = filteredVideos.filter(x=> x.qualityLabel >= '360p');
+      if(videosWithAtLestMediumQuality.length)
+        filteredVideos = videosWithAtLestMediumQuality;
+
+      filteredVideos.sort((a,b)=> a.qualityLabel > b.qualityLabel ?1:-1);
+      return filteredVideos[0];
+    }
+
+    IpcUtils.fetchVideoInfo(props.id).then(info=>{
+      if(state.fetchedInfo) return;
+      info.formats = info.formats.filter(x=>x.hasAudio);
+      if(!info.formats.length) 
+        return ;
+      Helper.setContentLengthIfNotExist(info);
+      const selectedFormat = findDefaultFormat(info);
+      setState({
+        fetchedInfo:info,
+        title:info.videoDetails.title,
+        thumbnailUrl:info.videoDetails.thumbnails[0].url,
+        videoFormats:info.formats,
+        selectedVideoFormat:selectedFormat,
+        isFetching:false,
+      })
+      props.onFetchComplete?.(props.id);
+    });
+
     setState({isFetching:true});
-    handleFetchComplete();
   }
   useEffect(()=>{
     downloadedSize[props.id]=0;

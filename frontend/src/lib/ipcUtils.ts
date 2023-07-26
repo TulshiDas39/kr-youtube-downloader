@@ -1,6 +1,6 @@
-import { RendererEvents } from "common_library";
+import { IVideoInfo, RendererEvents } from "common_library";
 import { ipcRenderer } from "electron";
-import { IPlaylistFetchComplete } from "./interfaces";
+import { IPlaylistFetchComplete, IProgress } from "./interfaces";
 
 export class IpcUtils{
     static isValidVideoUrl(url:string){
@@ -30,6 +30,43 @@ export class IpcUtils{
                 res(data);
             })
             ipcRenderer.send(RendererEvents.fetchPlaylistInfo().channel ,playlistId);
+        });
+    }
+
+    static openFolder(path:string){
+        ipcRenderer.send(RendererEvents.openFolder().channel,path);
+    }
+
+    static handleDownloadProgress(id:string, callback:(progress:IProgress)=>void){
+        const channel = RendererEvents.handleDownloadProgress().channel + id;
+        ipcRenderer.on(channel,(_,progress:IProgress)=>{
+            callback(progress);
+        })
+    }
+
+    
+    static handleDownloadComplete(id:string, callback:()=>void){
+        const channel = RendererEvents.handleDownloadProgress().channel + id;
+        ipcRenderer.on(channel,()=>{
+            ipcRenderer.removeAllListeners(RendererEvents.handleDownloadProgress().channel+id);
+            ipcRenderer.removeAllListeners(channel);
+            callback();            
+        })
+    }
+
+    static fetchVideoInfo(videoId:string){
+        const channel = RendererEvents.fetchVideoInfo().channel;
+        return new Promise<IVideoInfo>((res)=>{
+            const info:IVideoInfo = ipcRenderer.sendSync(channel,videoId);
+            res(info);
+        });
+    }
+
+    static startVideoDownload(videoId:string,progressHanlder:(progress:IProgress) => void){
+        const channel = RendererEvents.startVideoDownload().channel;
+        return new Promise<IVideoInfo>((res)=>{
+            const info:IVideoInfo = ipcRenderer.sendSync(channel,videoId);
+            res(info);
         });
     }
 }
