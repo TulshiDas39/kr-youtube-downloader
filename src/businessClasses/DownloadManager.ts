@@ -1,10 +1,10 @@
-import { Constants, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted, IVideoFormat, IVideoInfo, RendererEvents } from "common_library";
+import { Constants, IProgress, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted, IVideoFormat, IVideoInfo, RendererEvents } from "common_library";
 import { ipcMain } from "electron";
 import * as ytdl from "ytdl-core";
 import * as ytpl from "ytpl";
 import { FileManager } from "./FileManager";
 import * as path from "path";
-import { ConstantMain } from "../dataClasses";
+import { AppData, ConstantMain } from "../dataClasses";
 import * as fs from 'fs';
 
 export class DownloadManager{
@@ -13,7 +13,6 @@ export class DownloadManager{
     readonly workspacePath = ConstantMain.worksPaceDir;
     
     start(){
-        new FileManager();
         this.addIpcHandlers();
     }
 
@@ -103,23 +102,23 @@ export class DownloadManager{
         video.pipe(fs.createWriteStream(downloadPath));
         video.on('data',(chunk)=>{
         })
-        let progressChannel = Main_Events.HANDLE_PROGRESS_+info.videoDetails.videoId;
+        let progressChannel = RendererEvents.handleDownloadProgress().channel+info.videoDetails.videoId;
         if(playlistId) progressChannel+=playlistId;
         video.on('progress',(chunkSize:number)=>{
           let progress:IProgress={
             chunkSize:chunkSize,
             singleVideoId:info.videoDetails.videoId
           }
-          mainWindow?.webContents.send(progressChannel,progress);
+          AppData.mainWindow?.webContents.send(progressChannel,progress);
         })
-        let completeChannel = Main_Events.HANDLE_COMPLETE_+info.videoDetails.videoId;
-        if(playlistId)completeChannel+=playlistId;
+        let completeChannel = RendererEvents.handleDownloadComplete().channel + info.videoDetails.videoId;
+        if(playlistId) completeChannel += playlistId;
         video.on('end',()=>{
           let progress:IProgress={
             chunkSize:0,
             singleVideoId:info.videoDetails.videoId
           }
-          mainWindow?.webContents.send(completeChannel,progress);
+          AppData.mainWindow?.webContents.send(completeChannel,progress);
         })
     
       }

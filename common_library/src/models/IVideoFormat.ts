@@ -1,7 +1,7 @@
 
 export interface IVideoFormat {
-    hasVideo: boolean;
-    hasAudio: boolean;
+    hasVideo:boolean;
+    hasAudio:boolean;
     contentLength: string;
     isContentLengthCalculated?:boolean;
     itag:number;

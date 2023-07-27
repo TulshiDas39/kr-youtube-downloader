@@ -13,3 +13,4 @@ export * from './IVideoInfo';
 export * from './IVideoFormat';
 export * from './ISingleVideoDownloadStarted';
 export * from './IVideoDetails';
+export * from './IProgress';

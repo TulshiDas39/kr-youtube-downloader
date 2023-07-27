@@ -1,20 +1,20 @@
 import { RendererEvents } from "common_library";
 import { dialog, ipcMain, shell } from "electron";
 import * as fs from 'fs';
+import * as path from 'path';
+import { ConstantMain } from "../dataClasses";
 
-export class FileManager{
-    constructor(){
-        this.init();
-      }
-      init(){
+export class FileManager{    
+      start(){
         this.setIpcEvents();
       }
+      
       setIpcEvents(){
         this.handleFolderOpen();
       }
 
     handleFolderOpen(){
-        ipcMain.on(Renderer_Events.OPEN_FOLDER,(e,path:string)=>{
+        ipcMain.on(RendererEvents.openFolder().channel,(e,path:string)=>{
           shell.showItemInFolder(path);
         })
       }
@@ -37,7 +37,7 @@ export class FileManager{
     
       static createPlaylistFolderIfDoesnotExist(foldername:string){
         this.checkForWorksPace();
-        const playlistPath = join(ConstantMain.worksPaceDir,foldername);
+        const playlistPath = path.join(ConstantMain.worksPaceDir,foldername);
         this.createDirIfNotExistSync(playlistPath);
       }
 }

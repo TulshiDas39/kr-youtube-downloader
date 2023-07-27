@@ -1,5 +1,4 @@
 
-export interface IProgress{
-    singleVideoId:string;
-    chunkSize:number;
-}
+export interface T2{
+
+};

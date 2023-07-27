@@ -1,4 +1,4 @@
-import { IVideoInfo } from "./interfaces";
+import { IVideoInfo } from "common_library";
 
 export class Helper{
   static downloadExist:(id:string)=>boolean = ()=>{

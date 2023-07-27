@@ -4,8 +4,8 @@ import {FaFolderOpen} from "react-icons/fa"
 import { Item } from "ytpl";
 import { IoMdDownload } from "react-icons/io";
 import { Helper, IpcUtils, useMultiState } from "../../../lib";
-import { Main_Events, Renderer_Events } from "../../../lib/constants";
-import { ISingleVideoDownloadFromInfo, RendererEvents } from "common_library";
+import { Renderer_Events } from "../../../lib/constants";
+import { IProgress, ISingleVideoDownloadFromInfo, IVideoFormat, IVideoInfo, RendererEvents } from "common_library";
 
 const imgSrc = "https://cloudfour.com/examples/img-currentsrc/images/kitten-large.png";
 const downloadedSize:{[name:string]:number}={};
@@ -87,28 +87,6 @@ export function SingleVideo(props:IProps){
     IpcUtils.openFolder(state.downloadPath);    
   }
 
-  const handleProgress=()=>{
-    let progressChannel = Main_Events.HANDLE_PROGRESS_+props.id;
-    if(props.playlistId) progressChannel+=props.playlistId;
-    IpcUtils.handleDownloadProgress(progressChannel,(progress)=>{
-      downloadedSize[props.id]+=progress.chunkSize;
-      if(downloadedSize[props.id]> dataRef.current.contentLength)downloadedSize[props.id]=dataRef.current.contentLength;
-      let percent = Math.round((downloadedSize[props.id]/dataRef.current.contentLength)*100);
-      if(percent > 100) percent = 100;
-      if(state.progressPercent < percent) setState({progressPercent:percent});
-    });    
-  }
-
-  const handleComplete=()=>{
-    let id = props.id;
-    if(props.playlistId)id += props.playlistId;
-
-    IpcUtils.handleDownloadComplete(id,()=>{
-      setState({downloadComplete:true,inProgress:false,progressPercent:100});
-      props.onComplete?.(props.id);
-    });
-  }
-
   const showInfoFromProps=()=>{
     if(!props.info) {
       console.error("props.info in null");
@@ -118,14 +96,6 @@ export function SingleVideo(props:IProps){
       title:props.info.title,
       thumbnailUrl:props.info.thumbnails[0].url!,
       selectedVideoFormat:defaultVideoFormat,
-    })
-  }
-
-  const handleDownloadStarted=()=>{
-    let channel = Main_Events.HANDLE_SINGLE_VIDEO_DOWNLOAD_STARTED_+props.id;
-    if(props.playlistId) channel+=props.playlistId;
-    ipcRenderer.on(channel,(_,data:ISingleVideoDownloadStarted)=>{
-      setState({downloadPath:data.downloadPath});
     })
   }
 
@@ -151,16 +121,28 @@ export function SingleVideo(props:IProps){
       inProgress:true,
       formateText
     });
-    
-    handleDownloadStarted();
-    handleProgress();
-    handleComplete();
-    ipcRenderer.send(RendererEvents.startVideoDownload().channel,data);
+
+    const handleProgress =(progress:IProgress)=>{
+      downloadedSize[props.id]+=progress.chunkSize;
+        if(downloadedSize[props.id]> dataRef.current.contentLength)downloadedSize[props.id]=dataRef.current.contentLength;
+        let percent = Math.round((downloadedSize[props.id]/dataRef.current.contentLength)*100);
+        if(percent > 100) percent = 100;
+        if(state.progressPercent < percent) setState({progressPercent:percent});
+    }
+
+    const handleEnd = ()=>{
+      setState({downloadComplete:true,inProgress:false,progressPercent:100});
+      props.onComplete?.(props.id);
+    }
+
+    IpcUtils.startVideoDownload(data,handleProgress, handleEnd).then(res => {    
+      setState({downloadPath:res.downloadPath});    
+    });
+        
   }
   const startFetchInfo=()=>{
     if(state.isFetching) return;
     
-    ipcRenderer.send(Renderer_Events.FETCH_SINGLE_VIDEO_INFO, props.id);
     const findDefaultFormat=(info:IVideoInfo)=>{
       let filteredVideos:IVideoFormat[] = info.formats.slice();
       const mp4formats = info.formats.filter(x=> x.mimeType?.startsWith("video/mp4") && x.hasVideo);
