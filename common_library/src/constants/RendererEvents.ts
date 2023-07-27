@@ -93,7 +93,7 @@ export class RendererEvents{
     }
 
     static openFolder(){
-        const channel = arguments.callee.name;
+        const channel = "openFolder";
         const result:IChannelModel={
             channel,
             replyChannel: RendererEvents.replyChanelPrefix+channel
@@ -102,7 +102,7 @@ export class RendererEvents{
     }
 
     static handleDownloadProgress(){
-        const channel = arguments.callee.name;
+        const channel = "handleDownloadProgress";
         const result:IChannelModel={
             channel,
             replyChannel: RendererEvents.replyChanelPrefix+channel
@@ -112,7 +112,7 @@ export class RendererEvents{
 
 
     static handleDownloadComplete(){
-        const channel = arguments.callee.name;
+        const channel = "handleDownloadComplete";
         const result:IChannelModel={
             channel,
             replyChannel: RendererEvents.replyChanelPrefix+channel
@@ -121,7 +121,7 @@ export class RendererEvents{
     }
 
     static fetchVideoInfo(){
-        const channel = arguments.callee.name;
+        const channel = "fetchVideoInfo";
         const result:IChannelModel={
             channel,
             replyChannel: RendererEvents.replyChanelPrefix+channel
@@ -130,7 +130,7 @@ export class RendererEvents{
     }
 
     static videoFetchComplete(){
-        const channel = arguments.callee.name;
+        const channel = "videoFetchComplete";
         const result:IChannelModel={
             channel,
             replyChannel: RendererEvents.replyChanelPrefix+channel
@@ -139,7 +139,7 @@ export class RendererEvents{
     }
 
     static startVideoDownload(){
-        const channel = arguments.callee.name;
+        const channel = "startVideoDownload";
         const result:IChannelModel={
             channel,
             replyChannel: RendererEvents.replyChanelPrefix+channel

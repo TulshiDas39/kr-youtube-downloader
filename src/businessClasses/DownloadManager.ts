@@ -1,4 +1,4 @@
-import { Constants, IProgress, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted, IVideoFormat, IVideoInfo, RendererEvents } from "common_library";
+import { Constants, IPlaylistFetchComplete, IProgress, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted, IVideoFormat, IVideoInfo, RendererEvents } from "common_library";
 import { ipcMain } from "electron";
 import * as ytdl from "ytdl-core";
 import * as ytpl from "ytpl";
@@ -23,6 +23,7 @@ export class DownloadManager{
         this.addPlaylistIdExtractor();
         this.addVideoIdValidator();
         this.handleSingleVideoInfoFetch();
+        this.handlePlaylistVideoInfoFetch();
         this.handleSingleVideoDownloadFromInfo();
     }
 
@@ -33,7 +34,7 @@ export class DownloadManager{
     }
 
     private addPlaylistUrlValidator(){
-        ipcMain.on(RendererEvents.isValidVedioUrl().channel,(e,url:string)=>{
+        ipcMain.on(RendererEvents.isValidPlaylistUrl().channel,(e,url:string)=>{
             e.returnValue = ytpl.validateID(url);
         })
     }
@@ -62,6 +63,26 @@ export class DownloadManager{
             _event.returnValue = data;
           });
         })
+    }
+
+    handlePlaylistVideoInfoFetch=()=>{
+      ipcMain.on(RendererEvents.fetchPlaylistInfo().channel, async(e,playlistId:string)=>{
+        const info = await this.fetchPlaylistInfo(playlistId);
+        e.returnValue = info;
+      });
+    }
+
+    async fetchPlaylistInfo(id:string){
+      // const id = await ytpl.getPlaylistID(url);
+      return ytpl(id).then(result=>{
+        const folderName = result.title.replace(this.charactersToAvoidInFileName,"_");
+        const downloadPath = path.join(ConstantMain.worksPaceDir,folderName);
+        let data:IPlaylistFetchComplete={
+          result: result,
+          downloadPath:downloadPath,
+        }
+        return data;
+      });
     }
 
     handleSingleVideoDownloadFromInfo(){

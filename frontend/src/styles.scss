@@ -1,3 +1,5 @@
+//@import '~@fortawesome/fontawesome-free/css/all.css';
+@import '~bootstrap/dist/css/bootstrap.min.css';
 
 @font-face {
     font-family: 'Consolas';
@@ -104,6 +106,20 @@ html {
     height: 100vh;
   }
 
+  body {
+    position: relative;
+    // color: white !important;
+    height: 100vh;
+    background-color: #3e506a !important;
+    background-image: linear-gradient(
+      45deg,
+      rgba(0, 216, 255, 0.5) 10%,
+      rgba(0, 1, 127, 0.7)
+    );
+    overflow-y: hidden;
+  }
+  
+
   #root{
     height: 100%;
   }
@@ -200,4 +216,36 @@ html {
 
 .gs-overflow-y-auto{
   overflow-y: auto;
+}
+
+.icon-spin {
+  -webkit-animation: icon-spin 2s infinite linear;
+          animation: icon-spin 2s infinite linear;
+}
+
+@-webkit-keyframes icon-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+            transform: rotate(359deg);
+  }
+}
+
+@keyframes icon-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+            transform: rotate(359deg);
+  }
+}
+
+.hover-circle:hover{
+  border:1px solid rgb(218, 206, 206);
+  border-radius: 50%;
 }

@@ -24,11 +24,8 @@ export class IpcUtils{
 
     static fetchPlaylistInfo(playlistId:string){
         return new Promise<IPlaylistFetchComplete>((res)=>{
-            window.ipcRenderer.on(RendererEvents.handlePlaylistFetchComplete().channel+playlistId,(_e, data: IPlaylistFetchComplete)=>{
-                window.ipcRenderer.removeAllListeners(RendererEvents.handlePlaylistFetchComplete().channel+playlistId);
-                res(data);
-            })
-            window.ipcRenderer.send(RendererEvents.fetchPlaylistInfo().channel ,playlistId);
+            const info:IPlaylistFetchComplete = window.ipcRenderer.sendSync(RendererEvents.fetchPlaylistInfo().channel ,playlistId);
+            res(info);
         });
     }
 
