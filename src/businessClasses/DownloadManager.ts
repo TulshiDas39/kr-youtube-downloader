@@ -130,6 +130,7 @@ export class DownloadManager{
             chunkSize:chunkSize,
             singleVideoId:info.videoDetails.videoId
           }
+          console.log("progress",progress);
           AppData.mainWindow?.webContents.send(progressChannel,progress);
         })
         let completeChannel = RendererEvents.handleDownloadComplete().channel + info.videoDetails.videoId;

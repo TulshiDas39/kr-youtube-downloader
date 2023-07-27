@@ -1,13 +1,10 @@
 import { useEffect, useMemo, useRef } from "react";
 import { Container, Row, Col, Image, ProgressBar, Dropdown, Button, } from "react-bootstrap";
 import {FaFolderOpen} from "react-icons/fa"
-import { Item } from "ytpl";
 import { IoMdDownload } from "react-icons/io";
 import { Helper, IpcUtils, useMultiState } from "../../../lib";
-import { Renderer_Events } from "../../../lib/constants";
-import { IProgress, ISingleVideoDownloadFromInfo, IVideoFormat, IVideoInfo, RendererEvents } from "common_library";
+import { IPlaylistItem, IProgress, ISingleVideoDownloadFromInfo, IVideoFormat, IVideoInfo } from "common_library";
 
-const imgSrc = "https://cloudfour.com/examples/img-currentsrc/images/kitten-large.png";
 const downloadedSize:{[name:string]:number}={};
 const maxHeight='5rem';
 const MB = 1024*1024;
@@ -22,7 +19,7 @@ const defaultVideoFormat={
 
 interface IProps{
   id:string;
-  info?:Item;
+  info?:IPlaylistItem;
   startDownload?:boolean;
   startFetch?:boolean;
   playlistId?:string;
@@ -123,11 +120,14 @@ export function SingleVideo(props:IProps){
     });
 
     const handleProgress =(progress:IProgress)=>{
+      console.log("progress",progress);
       downloadedSize[props.id]+=progress.chunkSize;
-        if(downloadedSize[props.id]> dataRef.current.contentLength)downloadedSize[props.id]=dataRef.current.contentLength;
-        let percent = Math.round((downloadedSize[props.id]/dataRef.current.contentLength)*100);
-        if(percent > 100) percent = 100;
-        if(state.progressPercent < percent) setState({progressPercent:percent});
+      console.log("downloadedSize[props.id]",downloadedSize[props.id]);
+      console.log("dataRef.current.contentLength",dataRef.current.contentLength);
+      if(downloadedSize[props.id]> dataRef.current.contentLength)downloadedSize[props.id]=dataRef.current.contentLength;
+      let percent = Math.round((downloadedSize[props.id]/dataRef.current.contentLength)*100);
+      if(percent > 100) percent = 100;
+      if(state.progressPercent < percent) setState({progressPercent:percent});
     }
 
     const handleEnd = ()=>{

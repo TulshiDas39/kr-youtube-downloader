@@ -1,11 +1,10 @@
-import { Item, Result } from "ytpl";
-import { IPlaylistFetchComplete, IpcUtils, useMultiState } from "../../../lib";
-import { Main_Events, Renderer_Events } from "../../../lib/constants";
+import { IpcUtils, useMultiState } from "../../../lib";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp, FaDownload } from "react-icons/fa";
 import { useEffect } from "react";
 import { SingleVideo } from "./SingleVideo";
 import React from "react";
+import { IPlaylistFetchResult, IPlaylistItem } from "common_library";
 
 
 interface IPlaylistDownloadProps {
@@ -14,11 +13,11 @@ interface IPlaylistDownloadProps {
 
 export interface IPlaylistDownloadState{
     expanded:boolean,
-    info?:Result,
+    info?:IPlaylistFetchResult,
     donloadPath:string,
     isDownloading:boolean,
-    fetchingItem?:Item,
-    downloadingItem?:Item,
+    fetchingItem?:IPlaylistItem,
+    downloadingItem?:IPlaylistItem,
     completedIds:string[];
     isAllSelected:boolean;
     selectedVideoIds:string[]
@@ -34,14 +33,6 @@ function PlaylistDownloadComponent(props:IPlaylistDownloadProps){
         isAllSelected:true,
         selectedVideoIds:[],
     })
-
-    const channels = {
-        onFetchVideo: Main_Events.ON_SINGLE_VIDEO_INFO_FETCH_COMPLETE + props.id
-    }
-
-    const fetchIndex = 0;
-    const timeLimitForFetch = 30000;//second
-    const timeLimitForDownload = 1000*60*1;//in min
 
     const changeSelection=(id:string,isSelected:boolean)=>{
         let selectedVideoIds = [...state.selectedVideoIds,id];
@@ -59,7 +50,7 @@ function PlaylistDownloadComponent(props:IPlaylistDownloadProps){
         setState({downloadingItem:state.info.items[downloadingIndex]});    
     }
 
-    const handleSingleVideoDownloadComplete=(item:Item)=>{
+    const handleSingleVideoDownloadComplete=(item:IPlaylistItem)=>{
         if(!state.completedIds.includes(item.id)) {
           setState({completedIds:[...state.completedIds,item.id]});
         }

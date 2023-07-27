@@ -1,5 +1,4 @@
-import { IProgress, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted, IVideoInfo, RendererEvents } from "common_library";
-import { IPlaylistFetchComplete } from "./interfaces";
+import { IPlaylistFetchComplete, IProgress, ISingleVideoDownloadFromInfo, ISingleVideoDownloadStarted, IVideoInfo, RendererEvents } from "common_library";
 
 export class IpcUtils{
     static isValidVideoUrl(url:string){

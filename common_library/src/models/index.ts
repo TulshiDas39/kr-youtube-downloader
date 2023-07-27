@@ -15,3 +15,5 @@ export * from './ISingleVideoDownloadStarted';
 export * from './IVideoDetails';
 export * from './IProgress';
 export * from './IPlaylistFetchComplete';
+export * from './IPlaylistFetchResult';
+export * from './IPlaylistItem';
