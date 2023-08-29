@@ -120,10 +120,7 @@ export function SingleVideo(props:IProps){
     });
 
     const handleProgress =(progress:IProgress)=>{
-      console.log("progress",progress);
       downloadedSize[props.id]+=progress.chunkSize;
-      console.log("downloadedSize[props.id]",downloadedSize[props.id]);
-      console.log("dataRef.current.contentLength",dataRef.current.contentLength);
       if(downloadedSize[props.id]> dataRef.current.contentLength)downloadedSize[props.id]=dataRef.current.contentLength;
       let percent = Math.round((downloadedSize[props.id]/dataRef.current.contentLength)*100);
       if(percent > 100) percent = 100;
