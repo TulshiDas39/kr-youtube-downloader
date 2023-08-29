@@ -7,7 +7,7 @@ import { Main } from '..';
 function LayoutComponent() {
     const data = useRef({topHeighPercent:10});
     return (
-        <div id="layout" className="d-flex flex-column">
+        <div id="layout" className="d-flex flex-column h-100">
             <div className="d-flex" style={{height:`${data.current.topHeighPercent}%`}}>
             </div>
             <div className="" style={{height:`${100 - data.current.topHeighPercent}%`}}>

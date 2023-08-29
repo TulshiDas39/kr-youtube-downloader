@@ -118,7 +118,6 @@ function PlaylistDownloadComponent(props:IPlaylistDownloadProps){
     if(!state.info) return <p>Fetching info...</p>
 
     return (
-      <div>
         <Container className="border">
           <Row className="no-gutters overflow-hidden" style={{maxHeight:maxHeight}}>
             <Col xs={3} className="my-auto" style={{maxHeight:maxHeight}}>
@@ -168,7 +167,6 @@ function PlaylistDownloadComponent(props:IPlaylistDownloadProps){
                 }
           </div>
         </Container>
-      </div>
     )
 }
 

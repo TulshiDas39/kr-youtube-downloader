@@ -10,7 +10,7 @@ function DownloadListComponent(){
     downloadIds:state.home.downloadIds
   }))
     return (
-      <div>
+      <div className="" style={{maxHeight:'85%',overflow:'auto'}}>
         {
           downloadIds.map(id=>{
             if(IpcUtils.isValidVideoId(id)) return (

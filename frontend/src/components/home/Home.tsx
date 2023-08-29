@@ -55,24 +55,25 @@ function HomeComponent(){
     }
 
     return (
-      <div className="container text-center homeComponent">
-        <h1 className="test">kr-youtube-downloader</h1>
-        <Form onSubmit={handleSubmit}>
-          <Form.Group controlId="exampleForm.ControlInput1">
-            {/* <Form.Label>URL</Form.Label> */}
-            <div className="d-flex">
-              <Form.Control type="text" placeholder="URL" value={state.url} onChange={handleChange} />
-              {/* <Button className="ml-1" type="submit"><IoMdDownload /></Button> */}
-              {
-                store.inFetch.length ? <GiEuropeanFlag className="icon-spin h1"/>:
-                <Button className="ml-1" title="Fetch" type="submit"><FaAngleDoubleDown /></Button>
-              }
-            </div>
-          </Form.Group>
-        </Form>
-        <div>
-          <DownloadList />
+      <div className="container text-center homeComponent h-100">
+        <div style={{maxHeight:'15%',overflow:'hidden'}}>
+          <h1 className="test">kr-youtube-downloader</h1>
+          <Form onSubmit={handleSubmit}>
+            <Form.Group controlId="exampleForm.ControlInput1">
+              {/* <Form.Label>URL</Form.Label> */}
+              <div className="d-flex">
+                <Form.Control type="text" placeholder="URL" value={state.url} onChange={handleChange} />
+                {/* <Button className="ml-1" type="submit"><IoMdDownload /></Button> */}
+                {
+                  store.inFetch.length ? <GiEuropeanFlag className="icon-spin h1"/>:
+                  <Button className="ml-1" title="Fetch" type="submit"><FaAngleDoubleDown /></Button>
+                }
+              </div>
+            </Form.Group>
+          </Form>
         </div>
+        
+        <DownloadList />
       </div>
     )
 }
