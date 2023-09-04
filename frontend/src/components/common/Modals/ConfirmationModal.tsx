@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
-import { useDispatch } from "react-redux";
+import { shallowEqual, useDispatch } from "react-redux";
 import { ModalData } from "./ModalData";
 import { useSelectorTyped } from "../../../store/rootReducer";
 import { ModalName } from "../../../lib/constants";
@@ -9,7 +9,7 @@ import { ActionModal } from "../../../store/slices/modalSlice";
 function ConfirmationModalComponent(){
   const {show} = useSelectorTyped(state=>({
     show: state.modals.openModals.includes(ModalName.CONFIRMATION_MODAL)
-  }))
+  }),shallowEqual);
   const dispatch = useDispatch();
   const handleConfirmation=()=>{
     dispatch(ActionModal.hideModal(ModalName.CONFIRMATION_MODAL));

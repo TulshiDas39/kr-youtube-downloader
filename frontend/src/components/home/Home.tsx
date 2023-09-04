@@ -10,6 +10,7 @@ import { FaAngleDoubleDown } from "react-icons/fa";
 import { DownloadList } from "./subComponents/DownloadList";
 import { ActionModal } from "../../store/slices/modalSlice";
 import { ActionHome } from "../../store/slices";
+import { shallowEqual } from "react-redux";
 
 
 interface IHomeState {
@@ -21,7 +22,7 @@ function HomeComponent(){
     const store = useSelectorTyped(state=>({
         downloadIds:state.home.downloadIds,
         inFetch:state.home.inFetch,
-    }));
+    }),shallowEqual);
 
     const dispatch = useDispatchTyped();
 
