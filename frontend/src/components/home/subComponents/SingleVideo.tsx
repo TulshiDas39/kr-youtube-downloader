@@ -216,12 +216,13 @@ export function SingleVideo(props:IProps){
         <Row className="no-gutters " style={{height:maxHeight}}>
           <Col xs={3} className="my-auto h-100">
             <div className="d-flex h-100">
-              {!!props.playlistId && <div>
+              {!!props.playlistId ? <div>
                     <input id="selectAll" type="checkbox" checked={props.isSelected} onChange={()=>props.handleSelectChange?.(!props.isSelected)} className="pt-1" />
-              </div>}
+              </div>:
               <div className="flex-grow-1 h-100">
                 <Image src={state.thumbnailUrl} rounded className="w-100 h-100" />
-              </div>
+              </div>}
+              
             </div>
             
           </Col>
