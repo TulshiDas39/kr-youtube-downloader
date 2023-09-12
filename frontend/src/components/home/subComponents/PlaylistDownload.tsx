@@ -160,7 +160,7 @@ function PlaylistDownloadComponent(props:IPlaylistDownloadProps){
                 {
                   state.info.items.map(v=>(
                     <SingleVideo key={v.id} onComplete={()=>handleSingleVideoDownloadComplete(v)} id={v.id} playlistId={props.id}
-                       info={v} startDownload={state.downloadingItem?.id === v.id} startFetch={state.fetchingItem?.id === v.id}
+                       info={v} startDownload={state.downloadingItem?.id === v.id} startFetch={state.fetchingItem?.id === "xx"}
                        downloadPath={state.donloadPath} onFetchComplete={fetchNextVideo} isSelected={state.selectedVideoIds.includes(v.id)}
                        handleSelectChange={(isSelected)=>changeSelection(v.id,isSelected)} />
                   ))
