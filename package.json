@@ -1,7 +1,7 @@
 {
   "name": "kr-youtube-downloader",
   "version": "1.0.4",
-  "description": "A git gui application",
+  "description": "A youtube downloader application",
   "scripts": {
     "build": "tsc",
     "configure_dev": "cross-env-shell NODE_ENV=development FRONTEND_PORT=54533",
@@ -12,7 +12,8 @@
   },
   "main": "./dist/main.js",
   "keywords": [
-    "Git",
+    "youtube",
+    "downloader",
     "gui",
     "app",
     "ui"
@@ -43,8 +44,8 @@
     "ytpl": "^2.3.0"
   },
   "build": {
-    "productName": "Git_Studio",
-    "appId": "org.gitstudio.electron",
+    "productName": "ke_youtube_downloader",
+    "appId": "org.kr_youtube_downloader.electron",
     "asar": false,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
@@ -111,12 +112,12 @@
     "publish": {
       "provider": "github",
       "owner": "tulshidas39",
-      "repo": "gitstudio"
+      "repo": "kr-youtube-downloader"
     },
-    "artifactName": "Git-Studio-Setup-${os}-${arch}-${version}.${ext}"
+    "artifactName": "Kr-youtube-downloader-Setup-${os}-${arch}-${version}.${ext}"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tulshidas39/gitstudio.git"
+    "url": "git+https://github.com/tulshidas39/kr-youtube-downloader.git"
   }
 }
