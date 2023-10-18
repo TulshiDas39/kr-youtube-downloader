@@ -1,0 +1,24 @@
+{
+    "name": "common_library",
+    "version": "1.0.0",
+    "description": "Can log \"hello world\" and \"goodbye world\" to the console!",
+    "main": "./lib/index.js",
+    "scripts": {
+        "build": "tsc && npm run send",
+        "send": "concurrently \"npm run installToFrontend\" \"npm run installToBackend\" ",
+        "installToFrontend": "cd ../frontend && npm i ../common_library",
+        "installToBackend": "cd .. && npm i ./common_library"
+    },
+    "files": [
+        "/lib"
+    ],
+    "types": "./lib/index.d.ts",
+    "dependencies": {
+        "uuid": "^8.3.2"
+    },
+    "devDependencies": {
+        "@types/uuid": "^8.3.1",
+        "concurrently": "^8.2.0",
+        "typescript": "^5.1.6"
+    }
+}
