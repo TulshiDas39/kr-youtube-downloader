@@ -75,12 +75,6 @@ function PlaylistDownloadComponent(props:IPlaylistDownloadProps){
         setState({expanded:!state.expanded});
       }
 
-      const fetchNextVideo=()=>{
-        if(!state.info) return;
-        let fetchingIndex = state.info.items.findIndex(x=>x.id === state.fetchingItem?.id);
-        fetchingIndex++;
-        setState({fetchingItem:state.info.items[fetchingIndex]});
-      }
       const canDownload=(id:string)=>{
         if(!state.info) return false;
         if(!state.selectedVideoIds.includes(id))return false;
@@ -108,7 +102,7 @@ function PlaylistDownloadComponent(props:IPlaylistDownloadProps){
     }
     
     useEffect(()=>{
-            handleSelectionChange();
+          handleSelectionChange();
     },[state.selectedVideoIds]);
 
     useEffect(()=>{
@@ -160,8 +154,8 @@ function PlaylistDownloadComponent(props:IPlaylistDownloadProps){
                 {
                   state.info.items.map(v=>(
                     <SingleVideo key={v.id} onComplete={()=>handleSingleVideoDownloadComplete(v)} id={v.id} playlistId={props.id}
-                       info={v} startDownload={state.downloadingItem?.id === v.id} startFetch={state.fetchingItem?.id === "xx"}
-                       downloadPath={state.donloadPath} onFetchComplete={fetchNextVideo} isSelected={state.selectedVideoIds.includes(v.id)}
+                       info={v} startDownload={state.downloadingItem?.id === v.id}
+                       downloadPath={state.donloadPath} isSelected={state.selectedVideoIds.includes(v.id)}
                        handleSelectChange={(isSelected)=>changeSelection(v.id,isSelected)} />
                   ))
                 }

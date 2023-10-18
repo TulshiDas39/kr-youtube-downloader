@@ -21,10 +21,9 @@ interface IProps{
   id:string;
   info?:IPlaylistItem;
   startDownload?:boolean;
-  startFetch?:boolean;
+  // startFetch?:boolean;
   playlistId?:string;
-  onComplete?:(id:string)=>void;
-  onFetchComplete?:(id:string)=>void;
+  onComplete?:(id:string)=>void;  
   downloadPath?:string;
   isSelected?:boolean;
   handleSelectChange?:(isSelected:boolean)=>void;
@@ -173,35 +172,42 @@ export function SingleVideo(props:IProps){
         videoFormats:info.formats,
         selectedVideoFormat:selectedFormat,
         isFetching:false,
-      })
-      props.onFetchComplete?.(props.id);
+      })      
     });
 
     setState({isFetching:true});
   }
   useEffect(()=>{
     downloadedSize[props.id]=0;
-    if(!props.info) {
+    if(props.info) {
+      // startFetchInfo();
+      showInfoFromProps();
+    }
+    else{
       startFetchInfo();
     }
-    else showInfoFromProps();
+
   },[])
 
   useEffect(()=>{
-    if(state.startDownload && !!state.fetchedInfo) {
-      startDownloadVideo()
+    if(state.startDownload) {
+      if(state.fetchedInfo){
+        startDownloadVideo()
+      }
+      else {
+        startFetchInfo();
+      }
     }
   },[state.startDownload,state.fetchedInfo])
 
   useEffect(()=>{
-    if(props.startDownload && state.downloadComplete) props.onComplete?.(props.id);
-    else if(props.startDownload) setState({startDownload:true});
+    if(props.startDownload) setState({startDownload:true});
   },[props.startDownload])
 
   useEffect(()=>{
-    if(props.startFetch && state.fetchedInfo) props.onFetchComplete?.(props.id);
-    else if(props.startFetch) startFetchInfo();
-  },[props.startFetch])
+    if(state.downloadComplete)
+      props.onComplete?.(props.id);
+  },[state.downloadComplete])  
   
   const hanldeFormateSelectionToogle=(isOpen:boolean)=>{
     if(!isOpen) return;
@@ -215,11 +221,12 @@ export function SingleVideo(props:IProps){
       <Container className="border">
         <Row className="no-gutters " style={{height:maxHeight}}>
           <Col xs={3} className="my-auto h-100">
-            <div className="d-flex h-100">
-              {!!props.playlistId ? <div>
+            <div className="d-flex h-100 align-items-center">
+              {!!props.playlistId && <div>
                     <input id="selectAll" type="checkbox" checked={props.isSelected} onChange={()=>props.handleSelectChange?.(!props.isSelected)} className="pt-1" />
-              </div>:
-              <div className="flex-grow-1 h-100">
+                    {!state.startDownload && <span className="ps-2">Pending...</span>}
+              </div>}
+              {(!props.playlistId || state.startDownload) && <div className="flex-grow-1 h-100">
                 <Image src={state.thumbnailUrl} rounded className="w-100 h-100" />
               </div>}
               
