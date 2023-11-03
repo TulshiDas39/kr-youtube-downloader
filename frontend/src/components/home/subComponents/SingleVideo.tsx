@@ -11,9 +11,9 @@ const MB = 1024*1024;
 // const fileSize = parseInt(this.props.singleVideo.singleVideoInfo?.format.contentLength!);
 // const fileSizeMB = Math.round(fileSize / this.MB);
 const defaultVideoFormat={
-  itag:18,
+  itag:22,
   container:'mp4',
-  qualityLabel:"360p",
+  qualityLabel:"720p",
   mimeType:"video/mp4",
 } as IVideoFormat;
 
@@ -154,7 +154,11 @@ export function SingleVideo(props:IProps){
       if(videosWithAtLestMediumQuality.length)
         filteredVideos = videosWithAtLestMediumQuality;
 
-      filteredVideos.sort((a,b)=> a.qualityLabel > b.qualityLabel ?1:-1);
+      const videosWithAtLestHDQuality = filteredVideos.filter(x=> x.qualityLabel >= '720p');
+      if(videosWithAtLestHDQuality.length)
+        filteredVideos = videosWithAtLestHDQuality;
+      
+      filteredVideos.sort((a,b)=> a.qualityLabel > b.qualityLabel ?1:-1);      
       return filteredVideos[0];
     }
 
@@ -253,8 +257,8 @@ export function SingleVideo(props:IProps){
                       {getFormatTex(x)}
                     </Dropdown.Item>
                   ))}
-                  {state.isFetching &&
-                    <Dropdown.Item>Fetching...</Dropdown.Item>
+                  {!state.videoFormats?.length &&
+                    <Dropdown.Item key={"fetching"}>Fetching...</Dropdown.Item>
                   }
                 </Dropdown.Menu>
               </Dropdown>
