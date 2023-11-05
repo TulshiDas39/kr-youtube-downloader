@@ -52,8 +52,9 @@ export class IpcUtils{
     static fetchVideoInfo(videoId:string){
         const channel = RendererEvents.fetchVideoInfo().channel;
         return new Promise<IVideoInfo>((res)=>{
-            const info:IVideoInfo = window.ipcRenderer.sendSync(channel,videoId);
-            res(info);
+            window.ipcRenderer.invoke(channel,videoId).then((info:IVideoInfo )=>{
+                res(info);
+            });
         });
     }
 

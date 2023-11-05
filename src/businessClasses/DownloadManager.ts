@@ -57,11 +57,8 @@ export class DownloadManager{
     }
 
     handleSingleVideoInfoFetch=()=>{
-        ipcMain.on(RendererEvents.fetchVideoInfo().channel, (_event,id:string) => {
-    
-          ytdl.getInfo(Constants.URL_PREFIX+id).then(data=>{            
-            _event.returnValue = data;
-          });
+        ipcMain.handle(RendererEvents.fetchVideoInfo().channel,async (_event,id:string) => {
+          return await ytdl.getInfo(Constants.URL_PREFIX+id);
         })
     }
 

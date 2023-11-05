@@ -266,7 +266,7 @@ export function SingleVideo(props:IProps){
             {!!state.formateText && <p>{state.formateText}</p>}
             {state.downloadComplete &&
               <div>
-              <FaFolderOpen className="cursor-pointer h2" onClick={handleFolderClick} />
+              <FaFolderOpen className="cursor-pointer h2 cur-point" title="Show in folder" onClick={handleFolderClick} />
             </div>}
             {
               !state.inProgress && !!state.selectedVideoFormat && !state.downloadComplete &&
