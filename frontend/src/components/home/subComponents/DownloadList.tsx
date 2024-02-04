@@ -11,7 +11,7 @@ function DownloadListComponent(){
     downloadIds:state.home.downloadIds
   }),shallowEqual)
     return (
-      <div className="pt-2" style={{maxHeight:'85%',overflow:'auto'}}>
+      <div className="pt-2" style={{maxHeight:'85%', minHeight:600,overflow:'auto'}}>
         {
           downloadIds.map(id=>{
             if(IpcUtils.isValidVideoId(id)) return (
